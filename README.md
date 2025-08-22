@@ -18,7 +18,7 @@ Preview the app design (from Figma):
 
 📥 [Download Mockups (ZIP)](docs/Ora-Disaster-Resilience-PWA.zip)  
 
-![Ora Logo](src/assets/ora_logo.png)
+![Ora Logo](src/assets/ora_logo_2.png)
 
 ---
 
