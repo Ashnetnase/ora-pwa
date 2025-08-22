@@ -11,7 +11,7 @@ Ora is a **Progressive Web App (PWA)** prototype designed for New Zealand to imp
 ## 📂 Repository Contents
 - `src/` → codebase (to be developed with Cursor / Claude / Lovable)  
 - `docs/` → design assets & Figma/penpot mockups  
-- `src/assets/ora_logo.png` → official Ora logo  
+- `src/assets/ora_logo_2.png` → official Ora logo  
 
 ## 📸 Mockups
 Preview the app design (from Figma):  
