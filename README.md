@@ -16,7 +16,7 @@ Ora is a **Progressive Web App (PWA)** prototype designed for New Zealand to imp
 ## 📸 Mockups
 Preview the app design (from Figma):  
 
-📥 [Download Mockups (ZIP)](docs/Ora-Disaster-Resilience-PWA.zip)  
+📥 [Download Mockups (ZIP)](docs/Ora Disaster Resilience PWA.zip)  
 
 ![Ora Logo](src/assets/ora_logo_2.png)
 
