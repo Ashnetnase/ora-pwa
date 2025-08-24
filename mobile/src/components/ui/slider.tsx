@@ -1,63 +1,95 @@
-"use client";
+import * as React from "react"
+import { View, Text, StyleSheet } from "react-native"
+import Slider from "@react-native-community/slider"
 
-import * as React from "react";
-import * as SliderPrimitive from "@$1";
+import { cn } from "../../utils"
 
-import { cn } from "./utils";
-
-function Slider({
-  className,
-  defaultValue,
-  value,
-  min = 0,
-  max = 100,
-  ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
-  const _values = React.useMemo(
-    () =>
-      Array.isArray(value)
-        ? value
-        : Array.isArray(defaultValue)
-          ? defaultValue
-          : [min, max],
-    [value, defaultValue, min, max],
-  );
-
-  return (
-    <SliderPrimitive.Root
-      data-slot="slider"
-      defaultValue={defaultValue}
-      value={value}
-      min={min}
-      max={max}
-      className={cn(
-        "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
-        className,
-      )}
-      {...props}
-    >
-      <SliderPrimitive.Track
-        data-slot="slider-track"
-        className={cn(
-          "bg-muted relative grow overflow-hidden rounded-full data-[orientation=horizontal]:h-4 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5",
-        )}
-      >
-        <SliderPrimitive.Range
-          data-slot="slider-range"
-          className={cn(
-            "bg-primary absolute data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full",
-          )}
-        />
-      </SliderPrimitive.Track>
-      {Array.from({ length: _values.length }, (_, index) => (
-        <SliderPrimitive.Thumb
-          data-slot="slider-thumb"
-          key={index}
-          className="border-primary bg-background ring-ring/50 block size-4 shrink-0 rounded-full border shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-        />
-      ))}
-    </SliderPrimitive.Root>
-  );
+interface SliderProps {
+  className?: string
+  value?: number
+  defaultValue?: number
+  min?: number
+  max?: number
+  step?: number
+  onValueChange?: (value: number) => void
+  disabled?: boolean
+  style?: any
+  thumbStyle?: any
+  trackStyle?: any
+  minimumTrackTintColor?: string
+  maximumTrackTintColor?: string
+  thumbTintColor?: string
 }
 
-export { Slider };
+function CustomSlider({
+  className,
+  value,
+  defaultValue = 0,
+  min = 0,
+  max = 100,
+  step = 1,
+  onValueChange,
+  disabled = false,
+  style,
+  thumbStyle,
+  trackStyle,
+  minimumTrackTintColor = "#2563EB", // primary color
+  maximumTrackTintColor = "#E5E7EB", // muted color
+  thumbTintColor = "#FFFFFF",
+  ...props
+}: SliderProps) {
+  const [sliderValue, setSliderValue] = React.useState(value || defaultValue)
+
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setSliderValue(value)
+    }
+  }, [value])
+
+  const handleValueChange = (newValue: number) => {
+    setSliderValue(newValue)
+    onValueChange?.(newValue)
+  }
+
+  return (
+    <View style={[styles.container, style]}>
+      <Slider
+        style={[styles.slider, trackStyle]}
+        minimumValue={min}
+        maximumValue={max}
+        step={step}
+        value={sliderValue}
+        onValueChange={handleValueChange}
+        minimumTrackTintColor={minimumTrackTintColor}
+        maximumTrackTintColor={maximumTrackTintColor}
+        thumbStyle={[styles.thumb, thumbStyle]}
+        disabled={disabled}
+        {...props}
+      />
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: '100%',
+    paddingHorizontal: 8,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  thumb: {
+    width: 16,
+    height: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+})
+
+export { CustomSlider as Slider }

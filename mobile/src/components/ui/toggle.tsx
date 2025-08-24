@@ -1,47 +1,168 @@
-"use client";
+import * as React from "react"
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from "react-native"
+import { MaterialIcons } from "@expo/vector-icons"
 
-import * as React from "react";
-import * as TogglePrimitive from "@$1";
-import { cva, type VariantProps } from "class-variance-authority@0.7.1";
-
-import { cn } from "./utils";
-
-const toggleVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium hover:bg-muted hover:text-muted-foreground disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none transition-[color,box-shadow] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive whitespace-nowrap",
-  {
-    variants: {
-      variant: {
-        default: "bg-transparent",
-        outline:
-          "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
-      },
-      size: {
-        default: "h-9 px-2 min-w-9",
-        sm: "h-8 px-1.5 min-w-8",
-        lg: "h-10 px-2.5 min-w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-);
-
-function Toggle({
-  className,
-  variant,
-  size,
-  ...props
-}: React.ComponentProps<typeof TogglePrimitive.Root> &
-  VariantProps<typeof toggleVariants>) {
-  return (
-    <TogglePrimitive.Root
-      data-slot="toggle"
-      className={cn(toggleVariants({ variant, size, className }))}
-      {...props}
-    />
-  );
+interface ToggleProps {
+  pressed?: boolean
+  onPress?: () => void
+  disabled?: boolean
+  variant?: "default" | "outline"
+  size?: "default" | "sm" | "lg"
+  children?: React.ReactNode
+  icon?: keyof typeof MaterialIcons.glyphMap
+  style?: ViewStyle
+  textStyle?: TextStyle
+  className?: string
 }
 
-export { Toggle, toggleVariants };
+function Toggle({
+  pressed = false,
+  onPress,
+  disabled = false,
+  variant = "default",
+  size = "default",
+  children,
+  icon,
+  style,
+  textStyle,
+  className,
+  ...props
+}: ToggleProps) {
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "outline":
+        return pressed 
+          ? { ...styles.outlinePressed, ...styles[`${size}Container`] }
+          : { ...styles.outline, ...styles[`${size}Container`] }
+      default:
+        return pressed 
+          ? { ...styles.defaultPressed, ...styles[`${size}Container`] }
+          : { ...styles.default, ...styles[`${size}Container`] }
+    }
+  }
+
+  const getTextStyles = () => {
+    const baseTextStyle = styles[`${size}Text`]
+    const variantTextStyle = pressed 
+      ? styles.pressedText 
+      : styles.normalText
+    
+    return [baseTextStyle, variantTextStyle, textStyle]
+  }
+
+  const getIconSize = () => {
+    switch (size) {
+      case "sm": return 16
+      case "lg": return 24
+      default: return 20
+    }
+  }
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.base,
+        getVariantStyles(),
+        disabled && styles.disabled,
+        style
+      ]}
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.7}
+      {...props}
+    >
+      {icon && (
+        <MaterialIcons 
+          name={icon} 
+          size={getIconSize()} 
+          color={pressed ? "#FFFFFF" : "#6B7280"}
+          style={children ? styles.iconWithText : undefined}
+        />
+      )}
+      {children && (
+        <Text style={getTextStyles()}>
+          {children}
+        </Text>
+      )}
+    </TouchableOpacity>
+  )
+}
+
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    transition: 'all 0.2s',
+  },
+  
+  // Size variants
+  defaultContainer: {
+    height: 36,
+    paddingHorizontal: 8,
+    minWidth: 36,
+  },
+  smContainer: {
+    height: 32,
+    paddingHorizontal: 6,
+    minWidth: 32,
+  },
+  lgContainer: {
+    height: 40,
+    paddingHorizontal: 10,
+    minWidth: 40,
+  },
+  
+  // Text sizes
+  defaultText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  smText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  lgText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  
+  // Color variants
+  default: {
+    backgroundColor: 'transparent',
+  },
+  defaultPressed: {
+    backgroundColor: '#F3F4F6', // accent
+  },
+  outline: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#D1D5DB', // input border
+  },
+  outlinePressed: {
+    backgroundColor: '#F3F4F6', // accent
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+  },
+  
+  // Text colors
+  normalText: {
+    color: '#6B7280', // muted-foreground
+  },
+  pressedText: {
+    color: '#111827', // accent-foreground
+  },
+  
+  // States
+  disabled: {
+    opacity: 0.5,
+  },
+  
+  // Icon spacing
+  iconWithText: {
+    marginRight: 6,
+  },
+})
+
+export { Toggle }

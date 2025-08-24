@@ -5,6 +5,9 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Switch } from '../components/ui/switch';
+import { Slider } from '../components/ui/slider';
+import { Toggle } from '../components/ui/toggle';
+import { ToggleGroup } from '../components/ui/toggle-group';
 import { toast } from 'sonner';
 
 interface CitySubscription {
@@ -32,6 +35,12 @@ export default function Dashboard() {
   const [userName] = useState('User');
   const [subscriptions, setSubscriptions] = useState<CitySubscription[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('');
+  
+  // New UI component states
+  const [alertRadius, setAlertRadius] = useState(50);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [selectedAlertTypes, setSelectedAlertTypes] = useState<string[]>(['emergency']);
+  const [quickToggle, setQuickToggle] = useState(false);
 
   // Load subscriptions from localStorage on mount
   useEffect(() => {
@@ -97,6 +106,67 @@ export default function Dashboard() {
           Manage your emergency alert subscriptions for New Zealand cities
         </Text>
       </View>
+
+      {/* Alert Settings Section */}
+      <Card style={styles.addCityCard}>
+        <CardHeader>
+          <CardTitle style={styles.cardTitle}>
+            <Text style={styles.cardTitleText}>Alert Settings</Text>
+          </CardTitle>
+        </CardHeader>
+        <CardContent style={styles.cardContent}>
+          {/* Alert Radius Slider */}
+          <View style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Alert Radius: {alertRadius}km</Text>
+            <Slider
+              value={alertRadius}
+              onValueChange={setAlertRadius}
+              min={5}
+              max={200}
+              step={5}
+              style={styles.slider}
+              minimumTrackTintColor="#2563EB"
+              maximumTrackTintColor="#E5E7EB"
+            />
+          </View>
+
+          {/* Notifications Toggle */}
+          <View style={styles.settingRow}>
+            <Text style={styles.settingLabel}>Push Notifications</Text>
+            <Switch
+              value={notificationsEnabled}
+              onValueChange={setNotificationsEnabled}
+            />
+          </View>
+
+          {/* Alert Types Toggle Group */}
+          <View style={styles.settingItem}>
+            <Text style={styles.settingLabel}>Alert Types</Text>
+            <ToggleGroup
+              type="multiple"
+              value={selectedAlertTypes}
+              onValueChange={setSelectedAlertTypes}
+              items={[
+                { value: 'emergency', label: 'Emergency', icon: 'warning' },
+                { value: 'weather', label: 'Weather', icon: 'cloud' },
+                { value: 'traffic', label: 'Traffic', icon: 'traffic' },
+              ]}
+              style={styles.toggleGroup}
+            />
+          </View>
+
+          {/* Quick Toggle Example */}
+          <View style={styles.settingRow}>
+            <Text style={styles.settingLabel}>Do Not Disturb</Text>
+            <Toggle
+              pressed={quickToggle}
+              onPress={() => setQuickToggle(!quickToggle)}
+              icon="do-not-disturb"
+              variant="outline"
+            />
+          </View>
+        </CardContent>
+      </Card>
 
       {/* Add City Section */}
       <Card style={styles.addCityCard}>
@@ -376,5 +446,28 @@ const styles = StyleSheet.create({
   toggleText: {
     fontSize: 14,
     color: '#374151',
+  },
+  // New UI component styles
+  settingItem: {
+    marginBottom: 24,
+  },
+  settingRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  settingLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  toggleGroup: {
+    marginTop: 8,
   },
 });

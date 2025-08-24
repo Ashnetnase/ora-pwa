@@ -6,8 +6,8 @@ import AuthStack from './AuthStack';
 const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
-  // For now, show AuthStack first - you can toggle this to test
-  const isAuthenticated = false; // Set to true to skip login and go straight to tabs
+  // TEMPORARILY bypassing login to test main app screens
+  const isAuthenticated = true; // Set to true to skip login and go straight to tabs
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
