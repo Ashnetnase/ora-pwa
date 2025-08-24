@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 import MapView, { Marker, Callout, Region } from 'react-native-maps';
 import { theme } from '../theme/theme';
+import OfflineBanner from '../components/OfflineBanner';
+import EmptyState from '../components/EmptyState';
+import ErrorState from '../components/ErrorState';
 
 // Import mock data
 import quakesData from '../mock/quakes.json';
@@ -53,6 +56,8 @@ export default function Map() {
   const [activeFilters, setActiveFilters] = useState<Set<FilterType>>(
     new Set(['quakes', 'roading', 'community'])
   );
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // NZ center coordinates
   const initialRegion: Region = {
@@ -89,8 +94,50 @@ export default function Map() {
   const filteredRoads = activeFilters.has('roading') ? roadsData : [];
   const filteredReports = activeFilters.has('community') ? reportsData : [];
 
+  // Check if any data is available
+  const hasData = quakesData.length > 0 || roadsData.length > 0 || reportsData.length > 0;
+
+  if (hasError) {
+    return (
+      <View style={styles.container}>
+        <OfflineBanner />
+        <ErrorState
+          icon="🗺️"
+          title="Failed to Load Map Data"
+          message="There was an error loading the map information. Please check your connection and try again."
+          retryText="Retry"
+          onRetry={() => {
+            setHasError(false);
+            setIsLoading(true);
+            // Add retry logic here
+            console.log('Retrying map data load...');
+          }}
+        />
+      </View>
+    );
+  }
+
+  if (!hasData && !isLoading) {
+    return (
+      <View style={styles.container}>
+        <OfflineBanner />
+        <EmptyState
+          icon="🗺️"
+          title="No Map Data Available"
+          subtitle="Check your internet connection or try refreshing the map"
+          actionText="Refresh"
+          onAction={() => {
+            // Add refresh logic here
+            console.log('Refreshing map data...');
+          }}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      <OfflineBanner />
       {/* Filter Toggle Chips */}
       <View style={styles.filterContainer}>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>

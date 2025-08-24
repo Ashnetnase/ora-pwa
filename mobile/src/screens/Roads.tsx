@@ -3,11 +3,13 @@ import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   FlatList,
+  TouchableOpacity,
 } from 'react-native';
 import { theme } from '../theme/theme';
+import OfflineBanner from '../components/OfflineBanner';
+import EmptyState from '../components/EmptyState';
+import ErrorState from '../components/ErrorState';
 
 // Import mock data
 import roadsData from '../mock/roads.json';
@@ -27,12 +29,14 @@ interface RoadData {
 type FilterType = 'all' | 'closed' | 'planned' | 'clear';
 
 export default function Roads() {
-  const [selectedTab, setSelectedTab] = useState<FilterType>('all');
-  const [roads, setRoads] = useState<RoadData[]>([]);
+  const [activeTab, setActiveTab] = useState<'all' | 'closed' | 'planned' | 'clear'>('all');
+  const [roadsData, setRoadsData] = useState<RoadData[]>([]);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Load road data
   useEffect(() => {
-    setRoads(roadsData);
+    setRoadsData(roadsData);
   }, []);
 
   // Get status badge color
@@ -50,17 +54,17 @@ export default function Roads() {
   };
 
   // Filter roads based on selected tab
-  const filteredRoads = selectedTab === 'all' 
-    ? roads 
-    : roads.filter(road => road.status.toLowerCase() === selectedTab);
+  const filteredRoads = activeTab === 'all' 
+    ? roadsData 
+    : roadsData.filter(road => road.status.toLowerCase() === activeTab);
 
   // Get status counts
   const getStatusCounts = () => {
     return {
-      all: roads.length,
-      closed: roads.filter(r => r.status.toLowerCase() === 'closed').length,
-      planned: roads.filter(r => r.status.toLowerCase() === 'planned').length,
-      clear: roads.filter(r => r.status.toLowerCase() === 'clear').length,
+      all: roadsData.length,
+      closed: roadsData.filter(r => r.status.toLowerCase() === 'closed').length,
+      planned: roadsData.filter(r => r.status.toLowerCase() === 'planned').length,
+      clear: roadsData.filter(r => r.status.toLowerCase() === 'clear').length,
     };
   };
 
@@ -106,23 +110,23 @@ export default function Roads() {
       key={tab}
       style={[
         styles.tabButton,
-        selectedTab === tab && styles.tabButtonActive,
+        activeTab === tab && styles.tabButtonActive,
       ]}
-      onPress={() => setSelectedTab(tab)}
+      onPress={() => setActiveTab(tab)}
     >
       <Text style={[
         styles.tabButtonText,
-        selectedTab === tab && styles.tabButtonTextActive,
+        activeTab === tab && styles.tabButtonTextActive,
       ]}>
         {label}
       </Text>
       <View style={[
         styles.tabCount,
-        selectedTab === tab && styles.tabCountActive,
+        activeTab === tab && styles.tabCountActive,
       ]}>
         <Text style={[
           styles.tabCountText,
-          selectedTab === tab && styles.tabCountTextActive,
+          activeTab === tab && styles.tabCountTextActive,
         ]}>
           {counts[tab]}
         </Text>
@@ -130,8 +134,50 @@ export default function Roads() {
     </TouchableOpacity>
   );
 
+  // Check if there's an error
+  if (hasError) {
+    return (
+      <View style={styles.container}>
+        <OfflineBanner />
+        <ErrorState
+          icon="🛣️"
+          title="Failed to Load Road Data"
+          message="There was an error loading road conditions. Please check your connection and try again."
+          retryText="Retry"
+          onRetry={() => {
+            setHasError(false);
+            setIsLoading(true);
+            // Add retry logic here
+            console.log('Retrying roads data load...');
+          }}
+        />
+      </View>
+    );
+  }
+
+  // Check if any roads data is available
+  if (roadsData.length === 0 && !isLoading) {
+    return (
+      <View style={styles.container}>
+        <OfflineBanner />
+        <EmptyState
+          icon="🛣️"
+          title="No Road Data Available"
+          subtitle="Road conditions information is currently unavailable"
+          actionText="Refresh"
+          onAction={() => {
+            // Add refresh logic here
+            console.log('Refreshing roads data...');
+          }}
+        />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
+      <OfflineBanner />
+      
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Road Conditions</Text>
@@ -140,12 +186,12 @@ export default function Roads() {
 
       {/* Tabs */}
       <View style={styles.tabsContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        {/* <ScrollView horizontal showsHorizontalScrollIndicator={false}> */}
           {renderTabButton('all', 'All')}
           {renderTabButton('closed', 'Closed')}
           {renderTabButton('planned', 'Planned')}
           {renderTabButton('clear', 'Clear')}
-        </ScrollView>
+        {/* </ScrollView> */}
       </View>
 
       {/* Road Cards */}

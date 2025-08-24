@@ -2,10 +2,14 @@ import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { useAuth } from '../state/AuthContext';
+// [cursor-add]: import Dashboard screen
+import Dashboard from '../screens/Dashboard';
 // [cursor-add]: import Map screen
 import Map from '../screens/Map';
 // [cursor-add]: import Roads screen
 import Roads from '../screens/Roads';
+// [cursor-add]: import Report screen
+import Report from '../screens/Report';
 
 // Define the tab navigator types
 type TabParamList = {
@@ -18,29 +22,7 @@ type TabParamList = {
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-// Placeholder components - these will be replaced with your actual screen components
-const DashboardScreen = () => {
-  const { logout, user } = useAuth();
-  
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Dashboard</Text>
-      <Text style={styles.subtitle}>Welcome, {user?.email}</Text>
-      <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-// [cursor-add]: Roads screen is now imported and used
-const ReportScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.title}>Report Screen</Text>
-    <Text>Import your ReportScreen component here</Text>
-  </View>
-);
-
+// [cursor-add]: Dashboard screen is now imported and used
 const InfoScreen = () => (
   <View style={styles.container}>
     <Text style={styles.title}>Info Screen</Text>
@@ -63,7 +45,7 @@ export function Tabs() {
     >
       <Tab.Screen 
         name="Dashboard" 
-        component={DashboardScreen}
+        component={Dashboard}
         options={{
           tabBarLabel: 'Home',
           // Add tabBarIcon here when you have icons
@@ -85,7 +67,7 @@ export function Tabs() {
       />
       <Tab.Screen 
         name="Report" 
-        component={ReportScreen}
+        component={Report}
         options={{
           tabBarLabel: 'Report',
         }}
