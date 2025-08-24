@@ -1,0 +1,4 @@
+[
+  {"id":"r1","roadName":"SH1 - Desert Rd","status":"Closed","description":"Snow/ice","updatedISO":"2025-08-24T08:40:00Z","lat":-39.336,"lon":175.751},
+  {"id":"r2","roadName":"SH2 - Wairarapa","status":"Planned","description":"Maintenance","updatedISO":"2025-08-24T07:10:00Z","lat":-41.12,"lon":175.53}
+]

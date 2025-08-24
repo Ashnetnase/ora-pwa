@@ -1,0 +1,4 @@
+[
+  {"id":"q1","magnitude":3.8,"depthKm":12,"timeISO":"2025-08-24T10:12:00Z","place":"Near Napier","lat":-39.49,"lon":176.92},
+  {"id":"q2","magnitude":4.5,"depthKm":18,"timeISO":"2025-08-24T09:40:00Z","place":"Cook Strait","lat":-41.5,"lon":174.3}
+]

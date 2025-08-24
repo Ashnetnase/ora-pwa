@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { ActivityIndicator, View } from 'react-native';
 import { AuthStack } from './AuthStack';
 import { Tabs } from './Tabs';
+import { useAuth } from '../state/AuthContext';
 
 // Define the root stack types
 type RootStackParamList = {
@@ -12,24 +14,16 @@ type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, loading } = useAuth();
 
-  // Check for stored authentication on app load
-  useEffect(() => {
-    // TODO: Replace with AsyncStorage check when you're ready
-    // const checkAuth = async () => {
-    //   try {
-    //     const auth = await AsyncStorage.getItem('alartd_auth');
-    //     setIsAuthenticated(auth === 'true');
-    //   } catch (error) {
-    //     console.error('Failed to check auth status:', error);
-    //   }
-    // };
-    // checkAuth();
-    
-    // For now, start with auth screen
-    setIsAuthenticated(false);
-  }, []);
+  // Show loading screen while checking auth status
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#2563EB" />
+      </View>
+    );
+  }
 
   return (
     <Stack.Navigator
@@ -37,7 +31,7 @@ export function AppNavigator() {
         headerShown: false,
       }}
     >
-      {!isAuthenticated ? (
+      {!user ? (
         <Stack.Screen name="Auth" component={AuthStack} />
       ) : (
         <Stack.Screen name="Main" component={Tabs} />
