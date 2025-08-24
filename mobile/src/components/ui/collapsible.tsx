@@ -1,32 +1,89 @@
-"use client";
+import * as React from "react";
+import { View, Animated, ViewStyle } from "react-native";
 
-import * as CollapsiblePrimitive from "@radix-ui/react-collapsible";
-
-function Collapsible({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.Root>) {
-  return <CollapsiblePrimitive.Root data-slot="collapsible" {...props} />;
+interface CollapsibleProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
 }
 
-function CollapsibleTrigger({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleTrigger>) {
+interface CollapsibleTriggerProps {
+  asChild?: boolean;
+  children: React.ReactNode;
+}
+
+interface CollapsibleContentProps {
+  children: React.ReactNode;
+  style?: ViewStyle;
+}
+
+const CollapsibleContext = React.createContext<{
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}>({
+  open: false,
+  setOpen: () => {},
+});
+
+function Collapsible({ open = false, onOpenChange, children }: CollapsibleProps) {
+  const [isOpen, setIsOpen] = React.useState(open);
+
+  React.useEffect(() => {
+    setIsOpen(open);
+  }, [open]);
+
+  const setOpen = React.useCallback((newOpen: boolean) => {
+    setIsOpen(newOpen);
+    onOpenChange?.(newOpen);
+  }, [onOpenChange]);
+
   return (
-    <CollapsiblePrimitive.CollapsibleTrigger
-      data-slot="collapsible-trigger"
-      {...props}
-    />
+    <CollapsibleContext.Provider value={{ open: isOpen, setOpen }}>
+      <View>{children}</View>
+    </CollapsibleContext.Provider>
   );
 }
 
-function CollapsibleContent({
-  ...props
-}: React.ComponentProps<typeof CollapsiblePrimitive.CollapsibleContent>) {
+function CollapsibleTrigger({ asChild, children }: CollapsibleTriggerProps) {
+  const { open, setOpen } = React.useContext(CollapsibleContext);
+
+  if (asChild && React.isValidElement(children)) {
+    return React.cloneElement(children, {
+      onPress: () => setOpen(!open),
+      ...children.props,
+    });
+  }
+
+  return <View>{children}</View>;
+}
+
+function CollapsibleContent({ children, style }: CollapsibleContentProps) {
+  const { open } = React.useContext(CollapsibleContext);
+  const [height] = React.useState(new Animated.Value(0));
+
+  React.useEffect(() => {
+    Animated.timing(height, {
+      toValue: open ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [open, height]);
+
+  if (!open) {
+    return null;
+  }
+
   return (
-    <CollapsiblePrimitive.CollapsibleContent
-      data-slot="collapsible-content"
-      {...props}
-    />
+    <Animated.View
+      style={[
+        {
+          overflow: 'hidden',
+        },
+        style,
+      ]}
+    >
+      {children}
+    </Animated.View>
   );
 }
 

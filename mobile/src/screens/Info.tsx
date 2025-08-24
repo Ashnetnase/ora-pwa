@@ -1,330 +1,325 @@
 import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { Phone, Mail, Globe, Shield, CheckCircle, AlertTriangle, Info as InfoIcon } from 'lucide-react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { ChevronDown, ChevronRight, Droplets, Zap, Wind, CheckCircle, Phone, Mail, Globe, Shield, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../components/ui/collapsible';
 
 interface SafetyItem {
   id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  priority: 'high' | 'medium' | 'low';
+  text: string;
+  icon: React.ReactNode;
 }
 
-interface EmergencyContact {
+interface SafetyChecklist {
   id: string;
-  name: string;
-  type: 'phone' | 'email' | 'website';
-  value: string;
-  description: string;
+  title: string;
+  icon: React.ReactNode;
+  color: string;
+  bgColor: string;
+  items: SafetyItem[];
 }
 
-const SAFETY_CHECKLIST: SafetyItem[] = [
+const safetyChecklists: SafetyChecklist[] = [
   {
-    id: '1',
-    title: 'Emergency Kit Ready',
-    description: 'Ensure you have water, food, first aid, and essential supplies',
-    completed: false,
-    priority: 'high',
+    id: 'flood',
+    title: 'Flood Safety',
+    icon: <Droplets size={20} color="#ffffff" />,
+    color: '#2563EB',
+    bgColor: '#EFF6FF',
+    items: [
+      {
+        id: 'f1',
+        text: 'Move to higher ground immediately',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'f2',
+        text: 'Avoid walking or driving through flood water',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'f3',
+        text: 'Turn off electricity at the main switch',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'f4',
+        text: 'Have emergency supplies ready (water, food, radio)',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'f5',
+        text: 'Stay informed via official emergency channels',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'f6',
+        text: 'Do not return home until authorities say it\'s safe',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+    ],
   },
   {
-    id: '2',
-    title: 'Family Emergency Plan',
-    description: 'Discuss evacuation routes and meeting points with family',
-    completed: false,
-    priority: 'high',
+    id: 'earthquake',
+    title: 'Earthquake Safety',
+    icon: <Zap size={20} color="#ffffff" />,
+    color: '#F59E0B',
+    bgColor: '#FFFBEB',
+    items: [
+      {
+        id: 'e1',
+        text: 'Drop, Cover, and Hold On during shaking',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'e2',
+        text: 'Stay away from windows and heavy objects',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'e3',
+        text: 'If outdoors, move away from buildings and power lines',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'e4',
+        text: 'Check for injuries and hazards after shaking stops',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'e5',
+        text: 'Be prepared for aftershocks',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'e6',
+        text: 'Have a family emergency plan and meeting place',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 'e7',
+        text: 'Keep emergency kit stocked (3 days supplies)',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+    ],
   },
   {
-    id: '3',
-    title: 'Important Documents',
-    description: 'Keep copies of ID, insurance, and medical records in waterproof container',
-    completed: false,
-    priority: 'medium',
-  },
-  {
-    id: '4',
-    title: 'Communication Plan',
-    description: 'Establish how to contact family members during emergencies',
-    completed: false,
-    priority: 'medium',
-  },
-  {
-    id: '5',
-    title: 'Local Hazards Knowledge',
-    description: 'Understand risks specific to your area (floods, earthquakes, etc.)',
-    completed: false,
-    priority: 'low',
-  },
-];
-
-const EMERGENCY_CONTACTS: EmergencyContact[] = [
-  {
-    id: '1',
-    name: 'Emergency Services',
-    type: 'phone',
-    value: '111',
-    description: 'Police, Fire, Ambulance',
-  },
-  {
-    id: '2',
-    name: 'Civil Defence',
-    type: 'phone',
-    value: '0800 22 22 00',
-    description: 'National emergency management',
-  },
-  {
-    id: '3',
-    name: 'Weather Updates',
-    type: 'website',
-    value: 'metservice.com',
-    description: 'Official weather forecasts and warnings',
-  },
-  {
-    id: '4',
-    name: 'Road Conditions',
-    type: 'website',
-    value: 'nzta.govt.nz',
-    description: 'Real-time road status and closures',
-  },
-  {
-    id: '5',
-    name: 'Earthquake Info',
-    type: 'website',
-    value: 'geonet.org.nz',
-    description: 'Latest earthquake data and alerts',
+    id: 'storm',
+    title: 'Storm Safety',
+    icon: <Wind size={20} color="#ffffff" />,
+    color: '#6B7280',
+    bgColor: '#F9FAFB',
+    items: [
+      {
+        id: 's1',
+        text: 'Stay indoors and away from windows',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 's2',
+        text: 'Secure outdoor furniture and objects',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 's3',
+        text: 'Avoid using electrical appliances',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 's4',
+        text: 'Keep flashlights and battery radio ready',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 's5',
+        text: 'Monitor weather warnings and updates',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 's6',
+        text: 'Avoid driving unless absolutely necessary',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+      {
+        id: 's7',
+        text: 'Stay away from damaged power lines',
+        icon: <CheckCircle size={16} color="#10B981" />,
+      },
+    ],
   },
 ];
 
 export default function Info() {
-  const [checklist, setChecklist] = useState<SafetyItem[]>(SAFETY_CHECKLIST);
-  const [openSections, setOpenSections] = useState<Set<string>>(new Set(['checklist']));
+  const [openChecklists, setOpenChecklists] = useState<Set<string>>(new Set());
 
-  const toggleChecklistItem = (id: string) => {
-    setChecklist(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, completed: !item.completed } : item
-      )
-    );
+  const toggleChecklist = (id: string) => {
+    setOpenChecklists(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
   };
 
-  const toggleSection = (section: string) => {
-    const newSections = new Set(openSections);
-    if (newSections.has(section)) {
-      newSections.delete(section);
+  const handleContactPress = (contact: string) => {
+    if (contact.includes('http')) {
+      Linking.openURL(contact);
+    } else if (contact.includes('@')) {
+      Linking.openURL(`mailto:${contact}`);
     } else {
-      newSections.add(section);
-    }
-    setOpenSections(newSections);
-  };
-
-  const getPriorityBadge = (priority: SafetyItem['priority']) => {
-    switch (priority) {
-      case 'high':
-        return <Badge style={styles.highPriorityBadge}>High</Badge>;
-      case 'medium':
-        return <Badge style={styles.mediumPriorityBadge}>Medium</Badge>;
-      case 'low':
-        return <Badge style={styles.lowPriorityBadge}>Low</Badge>;
-      default:
-        return null;
+      Linking.openURL(`tel:${contact}`);
     }
   };
-
-  const getContactIcon = (type: EmergencyContact['type']) => {
-    switch (type) {
-      case 'phone':
-        return <Phone size={20} color="#2563EB" />;
-      case 'email':
-        return <Mail size={20} color="#10B981" />;
-      case 'website':
-        return <Globe size={20} color="#F59E0B" />;
-      default:
-        return <InfoIcon size={20} color="#6B7280" />;
-    }
-  };
-
-  const completedCount = checklist.filter(item => item.completed).length;
-  const totalCount = checklist.length;
 
   return (
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Emergency Information</Text>
+        <Text style={styles.title}>Safety Information</Text>
         <Text style={styles.subtitle}>
-          Stay prepared with safety checklists and emergency contacts
+          Essential checklists for emergency preparedness
         </Text>
       </View>
 
-      {/* Safety Checklist */}
-      <Card style={styles.sectionCard}>
-        <Collapsible
-          open={openSections.has('checklist')}
-          onOpenChange={() => toggleSection('checklist')}
-        >
-          <CollapsibleTrigger asChild>
-            <TouchableOpacity style={styles.sectionHeader}>
-              <View style={styles.sectionTitleContainer}>
-                <Shield size={24} color="#2563EB" />
-                <Text style={styles.sectionTitle}>Safety Checklist</Text>
-              </View>
-              <View style={styles.sectionMeta}>
-                <Text style={styles.progressText}>
-                  {completedCount}/{totalCount} completed
-                </Text>
-                <View style={styles.progressBar}>
-                  <View 
-                    style={[
-                      styles.progressFill, 
-                      { width: `${(completedCount / totalCount) * 100}%` }
-                    ]} 
-                  />
-                </View>
-              </View>
-            </TouchableOpacity>
-          </CollapsibleTrigger>
+      {/* Safety Checklists */}
+      <View style={styles.checklistsContainer}>
+        {safetyChecklists.map(checklist => {
+          const isOpen = openChecklists.has(checklist.id);
           
-          <CollapsibleContent>
-            <CardContent style={styles.checklistContent}>
-              {checklist.map((item) => (
-                <TouchableOpacity
-                  key={item.id}
-                  style={styles.checklistItem}
-                  onPress={() => toggleChecklistItem(item.id)}
-                >
-                  <View style={styles.checklistItemHeader}>
-                    <View style={styles.checklistItemInfo}>
-                      <Text style={[
-                        styles.checklistItemTitle,
-                        item.completed && styles.checklistItemTitleCompleted
-                      ]}>
-                        {item.title}
-                      </Text>
-                      <Text style={styles.checklistItemDescription}>
-                        {item.description}
-                      </Text>
-                    </View>
-                    <View style={styles.checklistItemActions}>
-                      {getPriorityBadge(item.priority)}
-                      <View style={[
-                        styles.checkbox,
-                        item.completed && styles.checkboxCompleted
-                      ]}>
-                        {item.completed && <CheckCircle size={16} color="#10B981" />}
-                      </View>
-                    </View>
+          return (
+            <Card key={checklist.id} style={styles.checklistCard}>
+              <TouchableOpacity
+                style={styles.checklistHeader}
+                onPress={() => toggleChecklist(checklist.id)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.checklistTitleContainer}>
+                  <View style={[styles.checklistIconContainer, { backgroundColor: checklist.color }]}>
+                    {checklist.icon}
                   </View>
-                </TouchableOpacity>
-              ))}
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
+                  <Text style={styles.checklistTitle}>{checklist.title}</Text>
+                </View>
+                <View style={styles.chevronContainer}>
+                  {isOpen ? (
+                    <ChevronDown size={20} color="#6B7280" />
+                  ) : (
+                    <ChevronRight size={20} color="#6B7280" />
+                  )}
+                </View>
+              </TouchableOpacity>
+              
+              {isOpen && (
+                <CardContent style={styles.checklistContent}>
+                  <View style={styles.checklistItems}>
+                    {checklist.items.map(item => (
+                      <View key={item.id} style={styles.checklistItem}>
+                        <View style={styles.checklistItemIcon}>
+                          {item.icon}
+                        </View>
+                        <Text style={styles.checklistItemText}>
+                          {item.text}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </CardContent>
+              )}
+            </Card>
+          );
+        })}
+      </View>
 
       {/* Emergency Contacts */}
-      <Card style={styles.sectionCard}>
-        <Collapsible
-          open={openSections.has('contacts')}
-          onOpenChange={() => toggleSection('contacts')}
-        >
-          <CollapsibleTrigger asChild>
-            <TouchableOpacity style={styles.sectionHeader}>
-              <View style={styles.sectionTitleContainer}>
-                <Phone size={24} color="#EF4444" />
-                <Text style={styles.sectionTitle}>Emergency Contacts</Text>
-              </View>
-              <Text style={styles.sectionSubtitle}>
-                Tap to expand
-              </Text>
-            </TouchableOpacity>
-          </CollapsibleTrigger>
-          
-          <CollapsibleContent>
-            <CardContent style={styles.contactsContent}>
-              {EMERGENCY_CONTACTS.map((contact) => (
-                <View key={contact.id} style={styles.contactItem}>
-                  <View style={styles.contactIcon}>
-                    {getContactIcon(contact.type)}
-                  </View>
-                  <View style={styles.contactInfo}>
-                    <Text style={styles.contactName}>{contact.name}</Text>
-                    <Text style={styles.contactValue}>{contact.value}</Text>
-                    <Text style={styles.contactDescription}>{contact.description}</Text>
-                  </View>
-                </View>
-              ))}
-            </CardContent>
-          </CollapsibleContent>
-        </Collapsible>
-      </Card>
-
-      {/* Quick Actions */}
-      <Card style={styles.sectionCard}>
-        <CardHeader>
-          <CardTitle style={styles.quickActionsTitle}>
-            <AlertTriangle size={20} color="#F59E0B" />
-            <Text style={styles.quickActionsTitleText}>Quick Actions</Text>
+      <Card style={styles.emergencyCardWithBackground}>
+        <CardHeader style={styles.emergencyHeader}>
+          <CardTitle style={styles.emergencyTitle}>
+            <AlertTriangle size={20} color="#EF4444" />
+            <Text style={styles.emergencyTitleText}>Emergency Contacts</Text>
           </CardTitle>
         </CardHeader>
-        <CardContent style={styles.quickActionsContent}>
-          <View style={styles.quickActionsGrid}>
-            <TouchableOpacity style={styles.quickActionButton}>
-              <Shield size={24} color="#2563EB" />
-              <Text style={styles.quickActionText}>Emergency Kit</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.quickActionButton}>
-              <Phone size={24} color="#EF4444" />
-              <Text style={styles.quickActionText}>Call 111</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.quickActionButton}>
-              <Globe size={24} color="#10B981" />
-              <Text style={styles.quickActionText}>Weather</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity style={styles.quickActionButton}>
-              <InfoIcon size={24} color="#F59E0B" />
-              <Text style={styles.quickActionText}>More Info</Text>
-            </TouchableOpacity>
-          </View>
+        <CardContent style={styles.emergencyContent}>
+          <TouchableOpacity 
+            style={styles.contactRow}
+            onPress={() => handleContactPress('111')}
+          >
+            <View style={styles.contactInfo}>
+              <Text style={styles.contactLabel}>Emergency Services</Text>
+              <Text style={styles.contactSubtext}>Police, Fire, Ambulance</Text>
+            </View>
+            <Text style={[styles.contactValue, { color: '#EF4444' }]}>111</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.contactDivider} />
+          
+          <TouchableOpacity 
+            style={styles.contactRow}
+            onPress={() => handleContactPress('0800 GET READY')}
+          >
+            <View style={styles.contactInfo}>
+              <Text style={styles.contactLabel}>Civil Defence</Text>
+              <Text style={styles.contactSubtext}>Emergency preparedness</Text>
+            </View>
+            <Text style={[styles.contactValue, { color: '#2563EB' }]}>0800 GET READY</Text>
+          </TouchableOpacity>
+          
+          <View style={styles.contactDivider} />
+          
+          <TouchableOpacity 
+            style={styles.contactRow}
+            onPress={() => handleContactPress('1737')}
+          >
+            <View style={styles.contactInfo}>
+              <Text style={styles.contactLabel}>National Crisis Helpline</Text>
+              <Text style={styles.contactSubtext}>Mental health support</Text>
+            </View>
+            <Text style={[styles.contactValue, { color: '#2563EB' }]}>1737</Text>
+          </TouchableOpacity>
         </CardContent>
       </Card>
 
-      {/* Emergency Tips */}
-      <Card style={styles.sectionCard}>
+      {/* Additional Resources */}
+      <Card style={styles.resourcesCard}>
         <CardHeader>
-          <CardTitle style={styles.tipsTitle}>
-            <InfoIcon size={20} color="#10B981" />
-            <Text style={styles.tipsTitleText}>Emergency Tips</Text>
+          <CardTitle style={styles.resourcesTitle}>
+            <Globe size={20} color="#10B981" />
+            <Text style={styles.resourcesTitleText}>Additional Resources</Text>
           </CardTitle>
         </CardHeader>
-        <CardContent style={styles.tipsContent}>
-          <View style={styles.tipItem}>
-            <Text style={styles.tipNumber}>1</Text>
-            <Text style={styles.tipText}>
-              Stay calm and assess the situation before taking action
-            </Text>
-          </View>
-          <View style={styles.tipItem}>
-            <Text style={styles.tipNumber}>2</Text>
-            <Text style={styles.tipText}>
-              Follow official instructions from emergency services
-            </Text>
-          </View>
-          <View style={styles.tipItem}>
-            <Text style={styles.tipNumber}>3</Text>
-            <Text style={styles.tipText}>
-              Keep emergency supplies easily accessible
-            </Text>
-          </View>
-          <View style={styles.tipItem}>
-            <Text style={styles.tipNumber}>4</Text>
-            <Text style={styles.tipText}>
-              Have a communication plan with family and friends
-            </Text>
+        <CardContent style={styles.resourcesContent}>
+          <Text style={styles.resourcesDescription}>
+            For more detailed emergency preparedness information, visit:
+          </Text>
+          <View style={styles.resourcesList}>
+            <TouchableOpacity 
+              style={styles.resourceItem}
+              onPress={() => handleContactPress('https://getready.govt.nz')}
+            >
+              <Globe size={16} color="#10B981" />
+              <Text style={styles.resourceText}>getready.govt.nz</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.resourceItem}
+              onPress={() => handleContactPress('https://civildefence.govt.nz')}
+            >
+              <Shield size={16} color="#2563EB" />
+              <Text style={styles.resourceText}>civildefence.govt.nz</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.resourceItem}
+              onPress={() => handleContactPress('https://metservice.com')}
+            >
+              <Wind size={16} color="#F59E0B" />
+              <Text style={styles.resourceText}>MetService weather warnings</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.resourceItem}
+              onPress={() => handleContactPress('https://geonet.org.nz')}
+            >
+              <Zap size={16} color="#EF4444" />
+              <Text style={styles.resourceText}>GeoNet earthquake information</Text>
+            </TouchableOpacity>
           </View>
         </CardContent>
       </Card>
@@ -338,237 +333,201 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
   },
   header: {
-    padding: 16,
-    paddingBottom: 24,
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 16,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: '600',
     color: '#111827',
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     color: '#6B7280',
+    textAlign: 'center',
     lineHeight: 24,
   },
-  sectionCard: {
-    margin: 16,
+  checklistsContainer: {
+    paddingHorizontal: 16,
+    gap: 16,
+  },
+  checklistCard: {
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    overflow: 'hidden',
   },
-  sectionHeader: {
+  checklistHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    paddingBottom: 0,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
   },
-  sectionTitleContainer: {
+  checklistTitleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
   },
-  sectionTitle: {
+  checklistIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checklistTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#111827',
   },
-  sectionMeta: {
-    alignItems: 'flex-end',
-    gap: 4,
-  },
-  progressText: {
-    fontSize: 12,
-    color: '#6B7280',
-  },
-  progressBar: {
-    width: 60,
-    height: 4,
-    backgroundColor: '#E5E7EB',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#10B981',
-    borderRadius: 2,
-  },
-  sectionSubtitle: {
-    fontSize: 12,
-    color: '#6B7280',
+  chevronContainer: {
+    padding: 4,
   },
   checklistContent: {
-    padding: 16,
-    gap: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 0,
+  },
+  checklistItems: {
+    gap: 16,
   },
   checklistItem: {
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#F9FAFB',
-  },
-  checklistItemHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'flex-start',
+    gap: 12,
   },
-  checklistItemInfo: {
+  checklistItemIcon: {
+    marginTop: 2,
+  },
+  checklistItemText: {
     flex: 1,
-    marginRight: 12,
+    fontSize: 15,
+    color: '#374151',
+    lineHeight: 22,
   },
-  checklistItemTitle: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#111827',
-    marginBottom: 4,
+  emergencyCard: {
+    margin: 16,
+    borderWidth: 1,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  checklistItemTitleCompleted: {
-    textDecorationLine: 'line-through',
-    color: '#6B7280',
+  emergencyCardWithBackground: {
+    margin: 16,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    backgroundColor: '#FEF2F2',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  checklistItemDescription: {
-    fontSize: 14,
-    color: '#6B7280',
-    lineHeight: 20,
+  emergencyHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 8,
   },
-  checklistItemActions: {
+  emergencyTitle: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  checkbox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
+  emergencyTitleText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#EF4444',
   },
-  checkboxCompleted: {
-    borderColor: '#10B981',
-    backgroundColor: '#F0FDF4',
+  emergencyContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    gap: 0,
   },
-  contactsContent: {
-    padding: 16,
-    gap: 16,
-  },
-  contactItem: {
+  contactRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  contactIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#F3F4F6',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 12,
   },
   contactInfo: {
     flex: 1,
   },
-  contactName: {
+  contactLabel: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#111827',
     marginBottom: 2,
+  },
+  contactSubtext: {
+    fontSize: 14,
+    color: '#6B7280',
   },
   contactValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#2563EB',
-    marginBottom: 4,
   },
-  contactDescription: {
-    fontSize: 14,
-    color: '#6B7280',
+  contactDivider: {
+    height: 1,
+    backgroundColor: '#FECACA',
+    marginVertical: 4,
   },
-  quickActionsTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  quickActionsTitleText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#111827',
-  },
-  quickActionsContent: {
-    padding: 16,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  quickActionButton: {
-    width: '48%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
+  resourcesCard: {
+    margin: 16,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 8,
-    backgroundColor: '#F9FAFB',
-    gap: 8,
+    borderRadius: 16,
+    backgroundColor: '#FFFFFF',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  quickActionText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#374151',
-  },
-  tipsTitle: {
+  resourcesTitle: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
   },
-  tipsTitleText: {
+  resourcesTitleText: {
     fontSize: 18,
     fontWeight: '600',
     color: '#111827',
   },
-  tipsContent: {
-    padding: 16,
-    gap: 12,
+  resourcesContent: {
+    gap: 16,
   },
-  tipItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-  },
-  tipNumber: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#2563EB',
-    color: '#ffffff',
+  resourcesDescription: {
     fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  tipText: {
-    flex: 1,
-    fontSize: 14,
-    color: '#374151',
+    color: '#6B7280',
     lineHeight: 20,
   },
-  highPriorityBadge: {
-    backgroundColor: '#EF4444',
-    color: '#ffffff',
+  resourcesList: {
+    gap: 12,
   },
-  mediumPriorityBadge: {
-    backgroundColor: '#F59E0B',
-    color: '#ffffff',
+  resourceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 4,
   },
-  lowPriorityBadge: {
-    backgroundColor: '#10B981',
-    color: '#ffffff',
+  resourceText: {
+    fontSize: 15,
+    color: '#374151',
+    fontWeight: '500',
   },
 });

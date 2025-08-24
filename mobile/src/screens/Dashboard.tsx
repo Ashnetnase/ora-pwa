@@ -145,7 +145,7 @@ export default function Dashboard() {
             <ToggleGroup
               type="multiple"
               value={selectedAlertTypes}
-              onValueChange={setSelectedAlertTypes}
+              onValueChange={(value) => setSelectedAlertTypes(value as string[])}
               items={[
                 { value: 'emergency', label: 'Emergency', icon: 'warning' },
                 { value: 'weather', label: 'Weather', icon: 'cloud' },
@@ -246,8 +246,8 @@ export default function Dashboard() {
                         <Text style={styles.toggleText}>Earthquake Alerts</Text>
                       </View>
                       <Switch
-                        checked={subscription.quakes}
-                        onCheckedChange={() => toggleAlert(subscription.id, 'quakes')}
+                        value={subscription.quakes}
+                        onValueChange={() => toggleAlert(subscription.id, 'quakes')}
                       />
                     </View>
                     
@@ -257,8 +257,8 @@ export default function Dashboard() {
                         <Text style={styles.toggleText}>Roading Alerts</Text>
                       </View>
                       <Switch
-                        checked={subscription.roading}
-                        onCheckedChange={() => toggleAlert(subscription.id, 'roading')}
+                        value={subscription.roading}
+                        onValueChange={() => toggleAlert(subscription.id, 'roading')}
                       />
                     </View>
                     
@@ -268,8 +268,8 @@ export default function Dashboard() {
                         <Text style={styles.toggleText}>Community Alerts</Text>
                       </View>
                       <Switch
-                        checked={subscription.community}
-                        onCheckedChange={() => toggleAlert(subscription.id, 'community')}
+                        value={subscription.community}
+                        onValueChange={() => toggleAlert(subscription.id, 'community')}
                       />
                     </View>
                   </View>
@@ -336,7 +336,7 @@ const styles = StyleSheet.create({
     borderColor: '#D1D5DB',
     borderRadius: 8,
     paddingHorizontal: 12,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#F9FAFB', // Light gray background for better visibility
     justifyContent: 'center',
   },
   addButton: {
@@ -414,7 +414,15 @@ const styles = StyleSheet.create({
     color: '#111827',
   },
   removeButton: {
-    padding: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#FEF2F2', // Light red background
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 0,
   },
   togglesContainer: {
     gap: 12,

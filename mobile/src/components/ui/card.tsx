@@ -1,79 +1,150 @@
-import * as React from "react"
+import * as React from "react";
+import { View, Text, ViewStyle, TextStyle } from "react-native";
+import { cn } from "./utils";
 
-import { cn } from "../../utils"
+interface CardProps {
+  style?: ViewStyle;
+  children?: React.ReactNode;
+}
 
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
+interface CardHeaderProps {
+  style?: ViewStyle;
+  children?: React.ReactNode;
+}
 
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+interface CardTitleProps {
+  style?: TextStyle | ViewStyle;
+  children?: React.ReactNode;
+}
 
-const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h3
-    ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
+interface CardContentProps {
+  style?: ViewStyle;
+  children?: React.ReactNode;
+}
 
-const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
+interface CardFooterProps {
+  style?: ViewStyle;
+  children?: React.ReactNode;
+}
 
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
+interface CardDescriptionProps {
+  style?: TextStyle;
+  children?: React.ReactNode;
+}
 
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
+function Card({ style, children, ...props }: CardProps) {
+  return (
+    <View
+      style={[
+        {
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: '#E5E7EB',
+          backgroundColor: '#FFFFFF',
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.05,
+          shadowRadius: 2,
+          elevation: 1,
+        },
+        style
+      ]}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+}
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+function CardHeader({ style, children, ...props }: CardHeaderProps) {
+  return (
+    <View
+      style={[
+        {
+          padding: 24,
+          paddingBottom: 12,
+        },
+        style
+      ]}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+}
+
+function CardTitle({ style, children, ...props }: CardTitleProps) {
+  return (
+    <Text
+      style={[
+        {
+          fontSize: 20,
+          fontWeight: '600',
+          color: '#111827',
+          lineHeight: 28,
+        },
+        style
+      ]}
+      {...props}
+    >
+      {children}
+    </Text>
+  );
+}
+
+function CardDescription({ style, children, ...props }: CardDescriptionProps) {
+  return (
+    <Text
+      style={[
+        {
+          fontSize: 14,
+          color: '#6B7280',
+          lineHeight: 20,
+          marginTop: 4,
+        },
+        style
+      ]}
+      {...props}
+    >
+      {children}
+    </Text>
+  );
+}
+
+function CardContent({ style, children, ...props }: CardContentProps) {
+  return (
+    <View
+      style={[
+        {
+          padding: 24,
+          paddingTop: 0,
+        },
+        style
+      ]}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+}
+
+function CardFooter({ style, children, ...props }: CardFooterProps) {
+  return (
+    <View
+      style={[
+        {
+          flexDirection: 'row',
+          alignItems: 'center',
+          padding: 24,
+          paddingTop: 0,
+        },
+        style
+      ]}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+}
+
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };

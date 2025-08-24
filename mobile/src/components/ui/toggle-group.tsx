@@ -1,12 +1,31 @@
 import * as React from "react"
 import { View, StyleSheet, ViewStyle } from "react-native"
 import { Toggle } from "./toggle"
-import { MaterialIcons } from "@expo/vector-icons"
+import { LucideIcon, AlertTriangle, Cloud, Car, List, Ban, Calendar, CheckCircle, BellOff, MapPin, Clock, Info, Plus, X, Home, FileText } from "lucide-react"
+
+// Common icon mappings for easy use
+const iconMap = {
+  'warning': AlertTriangle,
+  'cloud': Cloud, 
+  'traffic': Car,
+  'list': List,
+  'block': Ban,
+  'schedule': Calendar,
+  'check-circle': CheckCircle,
+  'do-not-disturb': BellOff,
+  'map-pin': MapPin,
+  'clock': Clock,
+  'info': Info,
+  'plus': Plus,
+  'x': X,
+  'home': Home,
+  'file-text': FileText,
+} as const
 
 interface ToggleGroupItem {
   value: string
   label: string
-  icon?: keyof typeof MaterialIcons.glyphMap
+  icon?: keyof typeof iconMap | LucideIcon
 }
 
 interface ToggleGroupProps {

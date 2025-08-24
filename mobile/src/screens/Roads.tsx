@@ -4,6 +4,7 @@ import { AlertTriangle, Clock, MapPin, CheckCircle, XCircle } from 'lucide-react
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { ToggleGroup } from '../components/ui/toggle-group';
 
 interface RoadData {
   id: string;
@@ -83,6 +84,7 @@ const mockRoads: RoadData[] = [
 
 export default function Roads() {
   const [activeTab, setActiveTab] = useState('all');
+  const [selectedFilter, setSelectedFilter] = useState('all');
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setIsError] = useState(false);
 
@@ -206,24 +208,24 @@ export default function Roads() {
         </Text>
       </View>
 
-      {/* Tabs */}
-      <View style={styles.tabsContainer}>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList style={styles.tabsList}>
-            <TabsTrigger value="all" style={styles.tabTrigger}>
-              All ({mockRoads.length})
-            </TabsTrigger>
-            <TabsTrigger value="closed" style={styles.tabTrigger}>
-              Closed ({mockRoads.filter(r => r.status === 'closed').length})
-            </TabsTrigger>
-            <TabsTrigger value="planned" style={styles.tabTrigger}>
-              Planned ({mockRoads.filter(r => r.status === 'planned').length})
-            </TabsTrigger>
-            <TabsTrigger value="clear" style={styles.tabTrigger}>
-              Clear ({mockRoads.filter(r => r.status === 'clear').length})
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+      {/* Filter Toggle Group */}
+      <View style={styles.filterContainer}>
+        <ToggleGroup
+          type="single"
+          value={selectedFilter}
+          onValueChange={(value) => {
+            setSelectedFilter(value as string);
+            setActiveTab(value as string);
+          }}
+          items={[
+            { value: 'all', label: `All (${mockRoads.length})`, icon: 'list' },
+            { value: 'closed', label: `Closed (${mockRoads.filter(r => r.status === 'closed').length})`, icon: 'block' },
+            { value: 'planned', label: `Planned (${mockRoads.filter(r => r.status === 'planned').length})`, icon: 'schedule' },
+            { value: 'clear', label: `Clear (${mockRoads.filter(r => r.status === 'clear').length})`, icon: 'check-circle' },
+          ]}
+          style={styles.toggleGroup}
+          variant="outline"
+        />
       </View>
 
       {/* Content */}
@@ -295,23 +297,14 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     lineHeight: 24,
   },
-  tabsContainer: {
+  filterContainer: {
     paddingHorizontal: 16,
     marginBottom: 16,
   },
-  tabsList: {
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 8,
-    padding: 4,
-  },
-  tabTrigger: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 6,
-    backgroundColor: 'transparent',
+  toggleGroup: {
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 6,
   },
   tabContent: {
     paddingHorizontal: 16,

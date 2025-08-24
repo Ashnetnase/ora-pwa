@@ -1,6 +1,25 @@
 import * as React from "react"
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from "react-native"
-import { MaterialIcons } from "@expo/vector-icons"
+import { LucideIcon, AlertTriangle, Cloud, Car, List, Ban, Calendar, CheckCircle, BellOff, MapPin, Clock, Info, Plus, X, Home, FileText } from "lucide-react"
+
+// Common icon mappings for easy use
+const iconMap = {
+  'warning': AlertTriangle,
+  'cloud': Cloud, 
+  'traffic': Car,
+  'list': List,
+  'block': Ban,
+  'schedule': Calendar,
+  'check-circle': CheckCircle,
+  'do-not-disturb': BellOff,
+  'map-pin': MapPin,
+  'clock': Clock,
+  'info': Info,
+  'plus': Plus,
+  'x': X,
+  'home': Home,
+  'file-text': FileText,
+} as const
 
 interface ToggleProps {
   pressed?: boolean
@@ -9,7 +28,7 @@ interface ToggleProps {
   variant?: "default" | "outline"
   size?: "default" | "sm" | "lg"
   children?: React.ReactNode
-  icon?: keyof typeof MaterialIcons.glyphMap
+  icon?: keyof typeof iconMap | LucideIcon
   style?: ViewStyle
   textStyle?: TextStyle
   className?: string
@@ -72,12 +91,16 @@ function Toggle({
       {...props}
     >
       {icon && (
-        <MaterialIcons 
-          name={icon} 
-          size={getIconSize()} 
-          color={pressed ? "#FFFFFF" : "#6B7280"}
-          style={children ? styles.iconWithText : undefined}
-        />
+        (() => {
+          const IconComponent = typeof icon === 'string' ? iconMap[icon as keyof typeof iconMap] : icon
+          return IconComponent ? (
+            <IconComponent 
+              size={getIconSize()} 
+              color={pressed ? "#FFFFFF" : "#6B7280"}
+              style={children ? styles.iconWithText : undefined}
+            />
+          ) : null
+        })()
       )}
       {children && (
         <Text style={getTextStyles()}>
@@ -133,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   defaultPressed: {
-    backgroundColor: '#F3F4F6', // accent
+    backgroundColor: '#2563EB', // primary blue
   },
   outline: {
     backgroundColor: 'transparent',
@@ -141,9 +164,9 @@ const styles = StyleSheet.create({
     borderColor: '#D1D5DB', // input border
   },
   outlinePressed: {
-    backgroundColor: '#F3F4F6', // accent
+    backgroundColor: '#2563EB', // primary blue
     borderWidth: 1,
-    borderColor: '#D1D5DB',
+    borderColor: '#2563EB',
   },
   
   // Text colors
@@ -151,7 +174,7 @@ const styles = StyleSheet.create({
     color: '#6B7280', // muted-foreground
   },
   pressedText: {
-    color: '#111827', // accent-foreground
+    color: '#FFFFFF', // white text on blue background
   },
   
   // States
