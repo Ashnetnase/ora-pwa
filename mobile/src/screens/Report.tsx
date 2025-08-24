@@ -1,286 +1,271 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  ActivityIndicator,
-} from 'react-native';
-import * as Location from 'expo-location';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { theme } from '../theme/theme';
-import OfflineBanner from '../components/OfflineBanner';
-import ErrorState from '../components/ErrorState';
+import React, { useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { MapPin, Camera, Send, AlertTriangle, Info } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Label } from '../components/ui/label';
+import { toast } from 'sonner';
 
-// Types for the report
 interface ReportData {
   id: string;
   title: string;
   description: string;
   category: string;
-  lat: number;
-  lon: number;
+  latitude: number;
+  longitude: number;
   createdISO: string;
+  photoUrl?: string;
 }
 
-// Category options
-const categories = ['Flood', 'Slip', 'Other'];
+const CATEGORIES = [
+  { value: 'flood', label: 'Flood', icon: '🌊' },
+  { value: 'slip', label: 'Slip', icon: '🏔️' },
+  { value: 'fire', label: 'Fire', icon: '🔥' },
+  { value: 'storm', label: 'Storm', icon: '⛈️' },
+  { value: 'other', label: 'Other', icon: '⚠️' },
+];
 
 export default function Report() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [lat, setLat] = useState<number | null>(null);
-  const [lon, setLon] = useState<number | null>(null);
-  const [isGettingLocation, setIsGettingLocation] = useState(false);
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasError, setHasError] = useState(false);
+  const [useMyLocation, setUseMyLocation] = useState(false);
 
-  const characterLimit = 280;
-  const remainingChars = characterLimit - description.length;
-
-  // Get current location
-  const getCurrentLocation = async () => {
-    setIsGettingLocation(true);
-    
+  const handleUseMyLocation = async () => {
     try {
-      // Request location permissions
-      const { status } = await Location.requestForegroundPermissionsAsync();
+      // Mock location for now - in real app, use expo-location
+      const mockLat = -36.8485;
+      const mockLng = 174.7633;
       
-      if (status !== 'granted') {
-        Alert.alert(
-          'Location Permission Denied',
-          'Please enable location access or enter coordinates manually.',
-          [{ text: 'OK' }]
-        );
-        setIsGettingLocation(false);
-        return;
-      }
-
-      // Get current position
-      const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-
-      setLat(location.coords.latitude);
-      setLon(location.coords.longitude);
+      setLatitude(mockLat.toString());
+      setLongitude(mockLng.toString());
+      setUseMyLocation(true);
       
-      Alert.alert('Success', 'Location captured successfully!');
+      toast.success('Location set to your current position');
     } catch (error) {
-      Alert.alert('Error', 'Failed to get location. Please enter coordinates manually.');
-    } finally {
-      setIsGettingLocation(false);
+      toast.error('Could not get your location. Please enter manually.');
+      setUseMyLocation(false);
     }
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
-    if (!title.trim() || !description.trim() || !category) {
-      Alert.alert('Error', 'Please fill in all required fields');
-      return;
-    }
-
-    if (!lat || !lon) {
-      Alert.alert('Error', 'Please provide location coordinates');
+    if (!title || !description || !category || !latitude || !longitude) {
+      toast.error('Please fill in all required fields');
       return;
     }
 
     setIsSubmitting(true);
-    setHasError(false);
 
     try {
-      // Read existing reports from AsyncStorage
-      const existingReportsJson = await AsyncStorage.getItem('alartd_reports');
-      const existingReports: ReportData[] = existingReportsJson 
-        ? JSON.parse(existingReportsJson) 
-        : [];
-
-      // Create new report
       const newReport: ReportData = {
         id: Date.now().toString(),
-        title: title.trim(),
-        description: description.trim(),
+        title,
+        description,
         category,
-        lat,
-        lon,
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
         createdISO: new Date().toISOString(),
+        photoUrl: photoUrl || undefined,
       };
 
-      // Append new report and save back to AsyncStorage
-      const updatedReports = [...existingReports, newReport];
-      await AsyncStorage.setItem('alartd_reports', JSON.stringify(updatedReports));
-
-      // Show success message
-      Alert.alert('Success', 'Report saved locally', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Reset form but keep location
-            setTitle('');
-            setDescription('');
-            setCategory('');
-            // Keep lat/lon for convenience
-          }
-        }
-      ]);
-
+      // Read existing reports from localStorage
+      const existingReports = localStorage.getItem('alartd_reports');
+      const reports: ReportData[] = existingReports ? JSON.parse(existingReports) : [];
+      
+      // Add new report
+      reports.push(newReport);
+      
+      // Save back to localStorage
+      localStorage.setItem('alartd_reports', JSON.stringify(reports));
+      
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setCategory('');
+      setLatitude('');
+      setLongitude('');
+      setPhotoUrl('');
+      setUseMyLocation(false);
+      
+      toast.success('Report saved locally');
     } catch (error) {
-      console.error('Failed to save report:', error);
-      setHasError(true);
+      toast.error('Failed to save report');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Render category button
-  const renderCategoryButton = (cat: string) => (
-    <TouchableOpacity
-      key={cat}
-      style={[
-        styles.categoryButton,
-        category === cat && styles.categoryButtonActive,
-      ]}
-      onPress={() => setCategory(cat)}
-    >
-      <Text style={[
-        styles.categoryButtonText,
-        category === cat && styles.categoryButtonTextActive,
-      ]}>
-        {cat}
-      </Text>
-    </TouchableOpacity>
-  );
+  const handlePhotoUpload = () => {
+    // Mock photo upload for now
+    const mockPhotoUrl = 'https://via.placeholder.com/300x200/2563EB/ffffff?text=Photo';
+    setPhotoUrl(mockPhotoUrl);
+    toast.success('Photo uploaded successfully');
+  };
 
-  if (hasError) {
-    return (
-      <View style={styles.container}>
-        <OfflineBanner />
-        <ErrorState
-          icon="📝"
-          title="Failed to Submit Report"
-          message="There was an error saving your report. Please try again."
-          retryText="Retry"
-          onRetry={() => {
-            setHasError(false);
-            handleSubmit();
-          }}
-        />
-      </View>
-    );
-  }
+  const isFormValid = title && description && category && latitude && longitude;
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <OfflineBanner />
-      
+    <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Report Incident</Text>
-        <Text style={styles.subtitle}>Help keep the community informed</Text>
+        <Text style={styles.subtitle}>
+          Help keep your community safe by reporting hazards and incidents
+        </Text>
       </View>
 
       {/* Form */}
-      <View style={styles.form}>
-        {/* Title Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Title *</Text>
-          <TextInput
-            style={styles.input}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Brief description of the incident"
-            maxLength={100}
-          />
-        </View>
-
-        {/* Description Field */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Description *</Text>
-          <TextInput
-            style={styles.textArea}
-            value={description}
-            onChangeText={setDescription}
-            placeholder="Provide more details about the incident..."
-            multiline
-            numberOfLines={4}
-            maxLength={characterLimit}
-            textAlignVertical="top"
-          />
-          <Text style={styles.characterCount}>
-            {remainingChars} characters remaining
-          </Text>
-        </View>
-
-        {/* Category Selection */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Category *</Text>
-          <View style={styles.categoryContainer}>
-            {categories.map(renderCategoryButton)}
+      <Card style={styles.formCard}>
+        <CardHeader>
+          <CardTitle style={styles.formTitle}>
+            <AlertTriangle size={20} color="#EF4444" />
+            <Text style={styles.formTitleText}>Incident Details</Text>
+          </CardTitle>
+        </CardHeader>
+        <CardContent style={styles.formContent}>
+          {/* Title */}
+          <View style={styles.formField}>
+            <Label style={styles.label}>Title *</Label>
+            <TextInput
+              style={styles.input}
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Brief description of the incident"
+              maxLength={100}
+            />
+            <Text style={styles.characterCount}>{title.length}/100</Text>
           </View>
-        </View>
 
-        {/* Location Section */}
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>Location</Text>
-          
-          {/* Use My Location Button */}
-          <TouchableOpacity
-            style={styles.locationButton}
-            onPress={getCurrentLocation}
-            disabled={isGettingLocation}
+          {/* Description */}
+          <View style={styles.formField}>
+            <Label style={styles.label}>Description *</Label>
+            <TextInput
+              style={[styles.input, styles.textarea]}
+              value={description}
+              onChangeText={setDescription}
+              placeholder="Provide detailed information about what you observed"
+              multiline
+              numberOfLines={4}
+              maxLength={280}
+            />
+            <Text style={styles.characterCount}>{description.length}/280</Text>
+          </View>
+
+          {/* Category */}
+          <View style={styles.formField}>
+            <Label style={styles.label}>Category *</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger style={styles.selectTrigger}>
+                <SelectValue placeholder="Select incident type" />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((cat) => (
+                  <SelectItem key={cat.value} value={cat.value}>
+                    <Text style={styles.categoryOption}>
+                      {cat.icon} {cat.label}
+                    </Text>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </View>
+
+          {/* Location Section */}
+          <View style={styles.locationSection}>
+            <View style={styles.locationHeader}>
+              <Label style={styles.label}>Location *</Label>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUseMyLocation}
+                style={styles.locationButton}
+              >
+                <MapPin size={16} />
+                <Text style={styles.locationButtonText}>
+                  {useMyLocation ? 'Location Set' : 'Use My Location'}
+                </Text>
+              </Button>
+            </View>
+            
+            <View style={styles.coordinatesContainer}>
+              <View style={styles.coordinateField}>
+                <Label style={styles.coordinateLabel}>Latitude</Label>
+                <TextInput
+                  style={styles.coordinateInput}
+                  value={latitude}
+                  onChangeText={setLatitude}
+                  placeholder="-36.8485"
+                  keyboardType="numeric"
+                />
+              </View>
+              <View style={styles.coordinateField}>
+                <Label style={styles.coordinateLabel}>Longitude</Label>
+                <TextInput
+                  style={styles.coordinateInput}
+                  value={longitude}
+                  onChangeText={setLongitude}
+                  placeholder="174.7633"
+                  keyboardType="numeric"
+                />
+              </View>
+            </View>
+          </View>
+
+          {/* Photo Upload */}
+          <View style={styles.formField}>
+            <Label style={styles.label}>Photo (Optional)</Label>
+            <TouchableOpacity
+              style={styles.photoUpload}
+              onPress={handlePhotoUpload}
+            >
+              {photoUrl ? (
+                <View style={styles.photoPreview}>
+                  <Text style={styles.photoPreviewText}>Photo uploaded ✓</Text>
+                </View>
+              ) : (
+                <View style={styles.photoPlaceholder}>
+                  <Camera size={24} color="#6B7280" />
+                  <Text style={styles.photoPlaceholderText}>Tap to add photo</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Submit Button */}
+          <Button
+            onClick={handleSubmit}
+            disabled={!isFormValid || isSubmitting}
+            style={!isFormValid || isSubmitting ? styles.submitButtonDisabled : styles.submitButton}
           >
-            {isGettingLocation ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text style={styles.locationButtonText}>Use My Location</Text>
-            )}
-          </TouchableOpacity>
+            <Send size={16} />
+            <Text style={styles.submitButtonText}>
+              {isSubmitting ? 'Submitting...' : 'Submit Report'}
+            </Text>
+          </Button>
+        </CardContent>
+      </Card>
 
-          {/* Manual Coordinates */}
-          <View style={styles.coordinatesContainer}>
-            <View style={styles.coordinateField}>
-              <Text style={styles.coordinateLabel}>Latitude</Text>
-              <TextInput
-                style={styles.coordinateInput}
-                value={lat?.toString() || ''}
-                onChangeText={(text) => setLat(parseFloat(text) || null)}
-                placeholder="-36.8485"
-                keyboardType="numeric"
-              />
-            </View>
-            <View style={styles.coordinateField}>
-              <Text style={styles.coordinateLabel}>Longitude</Text>
-              <TextInput
-                style={styles.coordinateInput}
-                value={lon?.toString() || ''}
-                onChangeText={(text) => setLon(parseFloat(text) || null)}
-                placeholder="174.7633"
-                keyboardType="numeric"
-              />
-            </View>
+      {/* Info Card */}
+      <Card style={styles.infoCard}>
+        <CardContent style={styles.infoContent}>
+          <View style={styles.infoHeader}>
+            <Info size={20} color="#2563EB" />
+            <Text style={styles.infoTitle}>About Reporting</Text>
           </View>
-        </View>
-
-        {/* Submit Button */}
-        <TouchableOpacity
-          style={[
-            styles.submitButton,
-            (!title.trim() || !description.trim() || !category || !lat || !lon) &&
-            styles.submitButtonDisabled
-          ]}
-          onPress={handleSubmit}
-          disabled={isSubmitting || !title.trim() || !description.trim() || !category || !lat || !lon}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator size="small" color="white" />
-          ) : (
-            <Text style={styles.submitButtonText}>Submit Report</Text>
-          )}
-        </TouchableOpacity>
-      </View>
+          <Text style={styles.infoText}>
+            Your reports help emergency services respond quickly to incidents. 
+            All reports are reviewed and may be shared with relevant authorities.
+          </Text>
+          <Text style={styles.infoText}>
+            For immediate emergencies, call 111.
+          </Text>
+        </CardContent>
+      </Card>
     </ScrollView>
   );
 }
@@ -288,100 +273,106 @@ export default function Report() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.bg,
+    backgroundColor: '#F9FAFB',
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    padding: 16,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: 4,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     color: '#6B7280',
+    lineHeight: 24,
   },
-  form: {
+  formCard: {
+    margin: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+  },
+  formTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  formTitleText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  formContent: {
     padding: 16,
+    gap: 20,
   },
-  fieldContainer: {
-    marginBottom: 24,
+  formField: {
+    gap: 8,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
   },
   input: {
-    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    borderRadius: theme.radius,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
     fontSize: 16,
+    backgroundColor: '#ffffff',
+    color: '#111827',
   },
-  textArea: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: theme.radius,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-    minHeight: 100,
+  textarea: {
+    height: 100,
+    textAlignVertical: 'top',
   },
   characterCount: {
     fontSize: 12,
-    color: '#9CA3AF',
+    color: '#6B7280',
     textAlign: 'right',
-    marginTop: 4,
   },
-  categoryContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  categoryButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: theme.radius,
-    backgroundColor: '#F3F4F6',
+  selectTrigger: {
+    height: 44,
     borderWidth: 1,
     borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+  },
+  categoryOption: {
+    fontSize: 16,
+  },
+  locationSection: {
+    gap: 12,
+  },
+  locationHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  categoryButtonActive: {
-    backgroundColor: theme.colors.blue,
-    borderColor: theme.colors.blue,
-  },
-  categoryButtonText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: theme.colors.text,
-  },
-  categoryButtonTextActive: {
-    color: 'white',
   },
   locationButton: {
-    backgroundColor: theme.colors.green,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: theme.radius,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 6,
+    backgroundColor: '#ffffff',
   },
   locationButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#374151',
   },
   coordinatesContainer: {
     flexDirection: 'row',
@@ -389,35 +380,91 @@ const styles = StyleSheet.create({
   },
   coordinateField: {
     flex: 1,
+    gap: 6,
   },
   coordinateLabel: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '500',
     color: '#6B7280',
-    marginBottom: 4,
   },
   coordinateInput: {
-    backgroundColor: 'white',
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    borderRadius: theme.radius,
-    paddingHorizontal: 12,
+    borderRadius: 6,
+    paddingHorizontal: 10,
     paddingVertical: 8,
     fontSize: 14,
+    backgroundColor: '#ffffff',
+    color: '#111827',
+  },
+  photoUpload: {
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    borderStyle: 'dashed',
+    borderRadius: 8,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#F9FAFB',
+  },
+  photoPlaceholder: {
+    alignItems: 'center',
+    gap: 8,
+  },
+  photoPlaceholderText: {
+    fontSize: 14,
+    color: '#6B7280',
+  },
+  photoPreview: {
+    alignItems: 'center',
+  },
+  photoPreviewText: {
+    fontSize: 14,
+    color: '#10B981',
+    fontWeight: '500',
   },
   submitButton: {
-    backgroundColor: theme.colors.blue,
-    paddingVertical: 16,
-    borderRadius: theme.radius,
+    flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 16,
+    justifyContent: 'center',
+    gap: 8,
+    height: 48,
+    backgroundColor: '#2563EB',
+    borderRadius: 8,
+    paddingHorizontal: 20,
   },
   submitButtonDisabled: {
-    backgroundColor: '#9CA3AF',
+    backgroundColor: '#D1D5DB',
   },
   submitButtonText: {
-    color: 'white',
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  infoCard: {
+    margin: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+  },
+  infoContent: {
+    padding: 16,
+    gap: 12,
+  },
+  infoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#6B7280',
+    lineHeight: 20,
   },
 });

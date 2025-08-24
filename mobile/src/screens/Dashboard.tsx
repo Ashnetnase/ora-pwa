@@ -1,32 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  FlatList,
-  Switch,
-  Alert,
-} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { theme } from '../theme/theme';
-import OfflineBanner from '../components/OfflineBanner';
-import ErrorState from '../components/ErrorState';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { Plus, X } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Switch } from '../components/ui/switch';
+import { toast } from 'sonner';
 
-// Types for the dashboard
 interface CitySubscription {
   id: string;
   name: string;
-  toggles: {
-    quakes: boolean;
-    roading: boolean;
-    community: boolean;
-  };
+  quakes: boolean;
+  roading: boolean;
+  community: boolean;
 }
 
-// Available NZ cities
 const NZ_CITIES = [
   'Auckland',
   'Wellington',
@@ -34,272 +22,191 @@ const NZ_CITIES = [
   'Hamilton',
   'Tauranga',
   'Dunedin',
+  'Palmerston North',
+  'Napier',
+  'Nelson',
+  'Rotorua',
 ];
 
 export default function Dashboard() {
+  const [userName] = useState('User');
   const [subscriptions, setSubscriptions] = useState<CitySubscription[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('');
-  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Load subscriptions from AsyncStorage on component mount
+  // Load subscriptions from localStorage on mount
   useEffect(() => {
-    loadSubscriptions();
+    const savedSubscriptions = localStorage.getItem('alartd_subscriptions');
+    if (savedSubscriptions) {
+      setSubscriptions(JSON.parse(savedSubscriptions));
+    }
   }, []);
 
-  // Save subscriptions to AsyncStorage whenever they change
+  // Save subscriptions to localStorage whenever they change
   useEffect(() => {
-    saveSubscriptions();
+    if (subscriptions.length >= 0) {
+      localStorage.setItem('alartd_subscriptions', JSON.stringify(subscriptions));
+    }
   }, [subscriptions]);
 
-  // Load subscriptions from AsyncStorage
-  const loadSubscriptions = async () => {
-    try {
-      setHasError(false);
-      const stored = await AsyncStorage.getItem('alartd_subscriptions');
-      if (stored) {
-        setSubscriptions(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Failed to load subscriptions:', error);
-      setHasError(true);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Save subscriptions to AsyncStorage
-  const saveSubscriptions = async () => {
-    try {
-      await AsyncStorage.setItem('alartd_subscriptions', JSON.stringify(subscriptions));
-    } catch (error) {
-      console.error('Failed to save subscriptions:', error);
-    }
-  };
-
-  // Add a new city subscription
-  const addCity = (cityName: string) => {
+  const addCity = () => {
+    if (!selectedCity) return;
+    
     // Check if city is already subscribed
-    if (subscriptions.some(sub => sub.name === cityName)) {
-      Alert.alert('Already Subscribed', 'You are already subscribed to this city');
+    if (subscriptions.some(sub => sub.name === selectedCity)) {
+      toast.error('Already subscribed to this city');
       return;
     }
 
     const newSubscription: CitySubscription = {
       id: Date.now().toString(),
-      name: cityName,
-      toggles: {
-        quakes: true,
-        roading: true,
-        community: true,
-      },
+      name: selectedCity,
+      quakes: true,
+      roading: true,
+      community: true,
     };
 
     setSubscriptions(prev => [...prev, newSubscription]);
     setSelectedCity('');
-    setShowCitySuggestions(false);
-    Alert.alert('Success', `Added ${cityName} to your alerts`);
+    toast.success(`Added ${selectedCity} to your alerts`);
   };
 
-  // Remove a city subscription
   const removeCity = (id: string) => {
     const city = subscriptions.find(sub => sub.id === id);
-    Alert.alert(
-      'Remove City',
-      `Are you sure you want to remove ${city?.name} from your alerts?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            setSubscriptions(prev => prev.filter(sub => sub.id !== id));
-            if (city) {
-              Alert.alert('Removed', `${city.name} has been removed from your alerts`);
-            }
-          },
-        },
-      ]
-    );
+    setSubscriptions(prev => prev.filter(sub => sub.id !== id));
+    if (city) {
+      toast.success(`Removed ${city.name} from your alerts`);
+    }
   };
 
-  // Toggle alert type for a city
-  const toggleAlert = (id: string, type: keyof CitySubscription['toggles']) => {
-    setSubscriptions(prev =>
-      prev.map(sub =>
-        sub.id === id
-          ? {
-              ...sub,
-              toggles: {
-                ...sub.toggles,
-                [type]: !sub.toggles[type],
-              },
-            }
-          : sub
+  const toggleAlert = (id: string, type: 'quakes' | 'roading' | 'community') => {
+    setSubscriptions(prev => 
+      prev.map(sub => 
+        sub.id === id ? { ...sub, [type]: !sub[type] } : sub
       )
     );
   };
 
-  // Filter cities based on input
-  const filteredCities = NZ_CITIES.filter(city =>
-    city.toLowerCase().includes(selectedCity.toLowerCase()) &&
-    !subscriptions.some(sub => sub.name === city)
-  );
-
-  // Render city subscription row
-  const renderCityRow = ({ item }: { item: CitySubscription }) => (
-    <View style={styles.cityCard}>
-      <View style={styles.cityHeader}>
-        <Text style={styles.cityName}>{item.name}</Text>
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => removeCity(item.id)}
-        >
-          <Text style={styles.deleteButtonText}>×</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.togglesContainer}>
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Quakes</Text>
-          <Switch
-            value={item.toggles.quakes}
-            onValueChange={() => toggleAlert(item.id, 'quakes')}
-            trackColor={{ false: '#E5E7EB', true: theme.colors.blue }}
-            thumbColor={item.toggles.quakes ? 'white' : '#F3F4F6'}
-          />
-        </View>
-
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Roading</Text>
-          <Switch
-            value={item.toggles.roading}
-            onValueChange={() => toggleAlert(item.id, 'roading')}
-            trackColor={{ false: '#E5E7EB', true: theme.colors.blue }}
-            thumbColor={item.toggles.roading ? 'white' : '#F3F4F6'}
-          />
-        </View>
-
-        <View style={styles.toggleRow}>
-          <Text style={styles.toggleLabel}>Community</Text>
-          <Switch
-            value={item.toggles.community}
-            onValueChange={() => toggleAlert(item.id, 'community')}
-            trackColor={{ false: '#E5E7EB', true: theme.colors.blue }}
-            thumbColor={item.toggles.community ? 'white' : '#F3F4F6'}
-          />
-        </View>
-      </View>
-    </View>
-  );
-
-  // Render city suggestion
-  const renderCitySuggestion = ({ item }: { item: string }) => (
-    <TouchableOpacity
-      style={styles.citySuggestion}
-      onPress={() => addCity(item)}
-    >
-      <Text style={styles.citySuggestionText}>{item}</Text>
-    </TouchableOpacity>
-  );
-
-  if (hasError) {
-    return (
-      <View style={styles.container}>
-        <OfflineBanner />
-        <ErrorState
-          icon="🏠"
-          title="Failed to Load Dashboard"
-          message="There was an error loading your subscriptions. Please try again."
-          retryText="Retry"
-          onRetry={() => {
-            setHasError(false);
-            setIsLoading(true);
-            loadSubscriptions();
-          }}
-        />
-      </View>
-    );
-  }
-
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <OfflineBanner />
-      
-      {/* Header */}
+    <ScrollView style={styles.container}>
+      {/* Welcome Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Welcome back! 👋</Text>
+        <Text style={styles.title}>
+          Welcome back, {userName}! 👋
+        </Text>
         <Text style={styles.subtitle}>
           Manage your emergency alert subscriptions for New Zealand cities
         </Text>
       </View>
 
       {/* Add City Section */}
-      <View style={styles.addCitySection}>
-        <Text style={styles.sectionTitle}>Add City</Text>
-        
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.cityInput}
-            value={selectedCity}
-            onChangeText={(text) => {
-              setSelectedCity(text);
-              setShowCitySuggestions(text.length > 0);
-            }}
-            placeholder="Search for a city..."
-            onFocus={() => setShowCitySuggestions(selectedCity.length > 0)}
-          />
-          
-          {showCitySuggestions && filteredCities.length > 0 && (
-            <View style={styles.suggestionsContainer}>
-              <FlatList
-                data={filteredCities}
-                renderItem={renderCitySuggestion}
-                keyExtractor={(item) => item}
-                scrollEnabled={false}
-              />
+      <Card style={styles.addCityCard}>
+        <CardHeader>
+          <CardTitle style={styles.cardTitle}>
+            <Plus size={20} color="#2563EB" />
+            <Text style={styles.cardTitleText}>Add City Alerts</Text>
+          </CardTitle>
+        </CardHeader>
+        <CardContent style={styles.cardContent}>
+          <View style={styles.addCitySection}>
+            <View style={styles.selectContainer}>
+              <Select value={selectedCity} onValueChange={setSelectedCity}>
+                <SelectTrigger style={styles.selectTrigger}>
+                  <SelectValue placeholder="Select a New Zealand city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {NZ_CITIES.filter(city => 
+                    !subscriptions.some(sub => sub.name === city)
+                  ).map(city => (
+                    <SelectItem key={city} value={city}>
+                      {city}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </View>
-          )}
-        </View>
-      </View>
+            <Button 
+              onClick={addCity}
+              disabled={!selectedCity}
+              style={!selectedCity ? styles.addButtonDisabled : styles.addButton}
+            >
+              <Plus size={16} />
+              <Text style={styles.addButtonText}>Add</Text>
+            </Button>
+          </View>
+        </CardContent>
+      </Card>
 
-      {/* Notifications Section */}
-      <View style={styles.notificationsSection}>
-        <Text style={styles.sectionTitle}>Notifications</Text>
-        <View style={styles.notificationRow}>
-          <Text style={styles.notificationLabel}>Enable push notifications</Text>
-          <Switch
-            value={notificationsEnabled}
-            onValueChange={setNotificationsEnabled}
-            trackColor={{ false: '#E5E7EB', true: theme.colors.blue }}
-            thumbColor={notificationsEnabled ? 'white' : '#F3F4F6'}
-          />
-        </View>
-      </View>
-
-      {/* Subscriptions Section */}
+      {/* Active Subscriptions */}
       <View style={styles.subscriptionsSection}>
         <Text style={styles.sectionTitle}>
-          Your Cities ({subscriptions.length})
+          Your Alert Subscriptions ({subscriptions.length})
         </Text>
         
         {subscriptions.length === 0 ? (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No cities added yet</Text>
-            <Text style={styles.emptyStateSubtext}>
-              Add a city above to start receiving emergency alerts
-            </Text>
-          </View>
+          <Card style={styles.emptyCard}>
+            <CardContent style={styles.emptyCardContent}>
+              <Plus size={48} color="#6B7280" style={styles.emptyIcon} />
+              <Text style={styles.emptyTitle}>No city subscriptions yet</Text>
+              <Text style={styles.emptySubtitle}>Add a city above to start receiving alerts</Text>
+            </CardContent>
+          </Card>
         ) : (
-          <FlatList
-            data={subscriptions}
-            renderItem={renderCityRow}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            showsVerticalScrollIndicator={false}
-          />
+          <View style={styles.subscriptionsList}>
+            {subscriptions.map(subscription => (
+              <Card key={subscription.id} style={styles.subscriptionCard}>
+                <CardContent style={styles.subscriptionCardContent}>
+                  <View style={styles.subscriptionHeader}>
+                    <Text style={styles.cityName}>
+                      {subscription.name}
+                    </Text>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeCity(subscription.id)}
+                      style={styles.removeButton}
+                    >
+                      <X size={16} color="#EF4444" />
+                    </Button>
+                  </View>
+                  
+                  <View style={styles.togglesContainer}>
+                    <View style={styles.toggleRow}>
+                      <View style={styles.toggleLabel}>
+                        <View style={[styles.indicator, styles.primaryIndicator]} />
+                        <Text style={styles.toggleText}>Earthquake Alerts</Text>
+                      </View>
+                      <Switch
+                        checked={subscription.quakes}
+                        onCheckedChange={() => toggleAlert(subscription.id, 'quakes')}
+                      />
+                    </View>
+                    
+                    <View style={styles.toggleRow}>
+                      <View style={styles.toggleLabel}>
+                        <View style={[styles.indicator, styles.warningIndicator]} />
+                        <Text style={styles.toggleText}>Roading Alerts</Text>
+                      </View>
+                      <Switch
+                        checked={subscription.roading}
+                        onCheckedChange={() => toggleAlert(subscription.id, 'roading')}
+                      />
+                    </View>
+                    
+                    <View style={styles.toggleRow}>
+                      <View style={styles.toggleLabel}>
+                        <View style={[styles.indicator, styles.accentIndicator]} />
+                        <Text style={styles.toggleText}>Community Alerts</Text>
+                      </View>
+                      <Switch
+                        checked={subscription.community}
+                        onCheckedChange={() => toggleAlert(subscription.id, 'community')}
+                      />
+                    </View>
+                  </View>
+                </CardContent>
+              </Card>
+            ))}
+          </View>
         )}
       </View>
     </ScrollView>
@@ -309,129 +216,135 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.bg,
+    backgroundColor: '#F9FAFB',
   },
   header: {
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    padding: 16,
+    paddingBottom: 24,
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: 4,
+    fontWeight: '600',
+    color: '#111827',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
     color: '#6B7280',
+    lineHeight: 24,
   },
-  addCitySection: {
-    padding: 16,
-    backgroundColor: 'white',
-    marginBottom: 8,
+  addCityCard: {
+    margin: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
   },
-  sectionTitle: {
+  cardTitle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  cardTitleText: {
     fontSize: 18,
     fontWeight: '600',
-    color: theme.colors.text,
-    marginBottom: 12,
+    color: '#111827',
   },
-  inputContainer: {
-    position: 'relative',
-  },
-  cityInput: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: theme.radius,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  suggestionsContainer: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
-    borderRadius: theme.radius,
-    marginTop: 4,
-    zIndex: 1000,
-    elevation: 5,
-  },
-  citySuggestion: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
-  },
-  citySuggestionText: {
-    fontSize: 16,
-    color: theme.colors.text,
-  },
-  notificationsSection: {
+  cardContent: {
     padding: 16,
-    backgroundColor: 'white',
-    marginBottom: 8,
   },
-  notificationRow: {
+  addCitySection: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    gap: 12,
   },
-  notificationLabel: {
+  selectContainer: {
+    flex: 1,
+  },
+  selectTrigger: {
+    height: 44,
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    height: 44,
+    backgroundColor: '#2563EB',
+    borderRadius: 8,
+    paddingHorizontal: 16,
+  },
+  addButtonDisabled: {
+    backgroundColor: '#D1D5DB',
+  },
+  addButtonText: {
+    color: '#ffffff',
     fontSize: 16,
-    color: theme.colors.text,
+    fontWeight: '500',
   },
   subscriptionsSection: {
     padding: 16,
-    backgroundColor: 'white',
-    marginBottom: 8,
+    gap: 16,
   },
-  cityCard: {
-    backgroundColor: 'white',
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#111827',
+  },
+  emptyCard: {
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: theme.radius,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
   },
-  cityHeader: {
+  emptyCardContent: {
+    padding: 24,
+    alignItems: 'center',
+  },
+  emptyIcon: {
+    marginBottom: 16,
+    opacity: 0.5,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    color: '#6B7280',
+    marginBottom: 4,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    textAlign: 'center',
+  },
+  subscriptionsList: {
+    gap: 12,
+  },
+  subscriptionCard: {
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    backgroundColor: '#ffffff',
+  },
+  subscriptionCardContent: {
+    padding: 16,
+  },
+  subscriptionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
   cityName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.colors.text,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#111827',
   },
-  deleteButton: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#EF4444',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteButtonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+  removeButton: {
+    padding: 4,
   },
   togglesContainer: {
     gap: 12,
@@ -442,23 +355,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toggleLabel: {
-    fontSize: 16,
-    color: theme.colors.text,
-  },
-  emptyState: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 40,
+    gap: 8,
   },
-  emptyStateText: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: theme.colors.text,
-    marginBottom: 4,
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
-  emptyStateSubtext: {
+  primaryIndicator: {
+    backgroundColor: '#2563EB',
+  },
+  warningIndicator: {
+    backgroundColor: '#F59E0B',
+  },
+  accentIndicator: {
+    backgroundColor: '#10B981',
+  },
+  toggleText: {
     fontSize: 14,
-    color: '#6B7280',
-    textAlign: 'center',
+    color: '#374151',
   },
 });
