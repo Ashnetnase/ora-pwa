@@ -21,6 +21,7 @@ interface CitySubscription {
   quakes: boolean;
   roading: boolean;
   community: boolean;
+  weather: boolean;
 }
 
 function AppContent() {

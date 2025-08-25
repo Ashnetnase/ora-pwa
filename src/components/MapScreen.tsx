@@ -583,6 +583,7 @@ interface MapScreenProps {
     quakes: boolean;
     roading: boolean;
     community: boolean;
+    weather: boolean;
   }>;
 }
 
@@ -623,13 +624,14 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
           quakes: subscriptions.some(sub => sub.quakes),
           roading: subscriptions.some(sub => sub.roading),
           community: subscriptions.some(sub => sub.community),
+          weather: subscriptions.some(sub => sub.weather),
         };
 
         const [quakeData, roadData, communityData, weatherData] = await Promise.all([
           enabledAlerts.quakes ? DataService.getEarthquakeData(subscribedCities) : Promise.resolve([]),
           enabledAlerts.roading ? DataService.getRoadData(subscribedCities) : Promise.resolve([]),
           enabledAlerts.community ? DataService.getCommunityData(subscribedCities) : Promise.resolve([]),
-          DataService.getWeatherWarnings(subscribedCities),
+          enabledAlerts.weather ? DataService.getWeatherWarnings(subscribedCities) : Promise.resolve([]),
         ]);
 
         const allMarkers: MapMarker[] = [
@@ -967,7 +969,7 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
               ? 'text-white' 
               : 'bg-white hover:bg-gray-50 text-gray-700'
           }`}
-          style={{
+                style={{
             backgroundColor: activeFilters.has('weather') ? COLORS.primary : COLORS.white,
             borderColor: activeFilters.has('weather') ? COLORS.primary : COLORS.gray[300],
             color: activeFilters.has('weather') ? COLORS.white : COLORS.gray[700]
@@ -977,7 +979,7 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
           <Cloud className="w-3 h-3 mr-1 fill-current" />
           Weather ({markers.filter(m => m.type === 'weather').length})
         </Badge>
-      </div>
+        </div>
 
       {/* Map Container - Contained within app layout */}
       <div className="h-full relative">
@@ -1012,7 +1014,7 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
                 No current alerts for your selected cities
               </p>
             </div>
-          </div>
+            </div>
         ) : mapError ? (
           <div 
             className="flex items-center justify-center px-4"
@@ -1114,7 +1116,7 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
                 ))}
               </MapContainer>
             </ErrorBoundary>
-          </div>
+        </div>
         )}
 
         {/* Selected Marker Info Panel */}

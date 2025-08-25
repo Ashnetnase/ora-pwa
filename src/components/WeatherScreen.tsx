@@ -15,6 +15,7 @@ interface WeatherScreenProps {
     quakes: boolean;
     roading: boolean;
     community: boolean;
+    weather: boolean;
   }>;
 }
 
@@ -31,8 +32,14 @@ export function WeatherScreen({ subscriptions }: WeatherScreenProps) {
   const loadWeatherData = async () => {
     setIsLoading(true);
     try {
-      const data = await DataService.getWeatherDataForSubscriptions(subscriptions);
-      setWeatherData(data);
+      // Only load data if weather alerts are enabled for at least one subscription
+      const hasWeatherEnabled = subscriptions.some(sub => sub.weather);
+      if (hasWeatherEnabled) {
+        const data = await DataService.getWeatherDataForSubscriptions(subscriptions);
+        setWeatherData(data);
+      } else {
+        setWeatherData({ warnings: [], forecasts: [] });
+      }
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Failed to load weather data:', error);

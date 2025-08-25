@@ -10,9 +10,11 @@ interface RoadsScreenProps {
   subscriptions: Array<{
     id: string;
     name: string;
+    type: 'city' | 'region';
     quakes: boolean;
     roading: boolean;
     community: boolean;
+    weather: boolean;
   }>;
 }
 

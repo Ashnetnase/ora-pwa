@@ -15,6 +15,7 @@ interface CitySubscription {
   quakes: boolean;
   roading: boolean;
   community: boolean;
+  weather: boolean;
 }
 
 interface DashboardProps {
@@ -34,6 +35,14 @@ export function Dashboard({ userName, subscriptions, setSubscriptions }: Dashboa
       localStorage.setItem('alartd_subscriptions', JSON.stringify(subscriptions));
     }
   }, [subscriptions]);
+
+  // Migrate existing subscriptions to include weather property
+  useEffect(() => {
+    setSubscriptions(prev => prev.map(sub => ({
+      ...sub,
+      weather: sub.weather !== undefined ? sub.weather : true // Default weather alerts to enabled
+    })));
+  }, []);
 
   const addLocation = () => {
     if (!selectedLocation) return;
@@ -58,6 +67,7 @@ export function Dashboard({ userName, subscriptions, setSubscriptions }: Dashboa
       quakes: true,
       roading: true,
       community: true,
+      weather: true,
     };
 
     setSubscriptions(prev => [...prev, newSubscription]);
@@ -86,6 +96,7 @@ export function Dashboard({ userName, subscriptions, setSubscriptions }: Dashboa
       quakes: true,
       roading: true,
       community: true,
+      weather: true,
     };
 
     setSubscriptions(prev => [...prev, newSubscription]);
@@ -101,7 +112,7 @@ export function Dashboard({ userName, subscriptions, setSubscriptions }: Dashboa
     }
   };
 
-  const toggleAlert = (id: string, type: 'quakes' | 'roading' | 'community') => {
+  const toggleAlert = (id: string, type: 'quakes' | 'roading' | 'community' | 'weather') => {
     setSubscriptions(prev => 
       prev.map(sub => 
         sub.id === id ? { ...sub, [type]: !sub[type] } : sub
@@ -330,6 +341,17 @@ export function Dashboard({ userName, subscriptions, setSubscriptions }: Dashboa
                       <Switch
                         checked={subscription.community}
                         onCheckedChange={() => toggleAlert(subscription.id, 'community')}
+                      />
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                        <span className="text-sm">Weather Alerts</span>
+                      </div>
+                      <Switch
+                        checked={subscription.weather}
+                        onCheckedChange={() => toggleAlert(subscription.id, 'weather')}
                       />
                     </div>
                   </div>
