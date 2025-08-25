@@ -183,6 +183,66 @@ export default function Info() {
         </Text>
       </View>
 
+      {/* Trusted Data Sources Badge */}
+      <Card style={styles.trustedSourcesCard}>
+        <CardContent style={styles.trustedSourcesContent}>
+          <View style={styles.trustedSourcesHeader}>
+            <Ionicons name="shield-checkmark" size={20} color="#2563EB" />
+            <Text style={styles.trustedSourcesTitle}>Trusted Data Sources</Text>
+          </View>
+          <View style={styles.sourceBadges}>
+            <View style={[styles.sourceBadge, { backgroundColor: '#EFF6FF', borderColor: '#DBEAFE' }]}>
+              <Ionicons name="pulse" size={12} color="#1D4ED8" />
+              <Text style={[styles.sourceBadgeText, { color: '#1D4ED8' }]}>GeoNet NZ</Text>
+            </View>
+            <View style={[styles.sourceBadge, { backgroundColor: '#FFF7ED', borderColor: '#FED7AA' }]}>
+              <Ionicons name="globe" size={12} color="#C2410C" />
+              <Text style={[styles.sourceBadgeText, { color: '#C2410C' }]}>NZTA</Text>
+            </View>
+            <View style={[styles.sourceBadge, { backgroundColor: '#F0FDF4', borderColor: '#BBF7D0' }]}>
+              <Ionicons name="cloud" size={12} color="#15803D" />
+              <Text style={[styles.sourceBadgeText, { color: '#15803D' }]}>MetService</Text>
+            </View>
+          </View>
+          <Text style={styles.trustedSourcesDescription}>
+            Official New Zealand government data sources for real-time emergency information
+          </Text>
+        </CardContent>
+      </Card>
+
+      {/* Emergency Quick Dial */}
+      <Card style={styles.emergencyQuickDialCard}>
+        <CardContent style={styles.emergencyQuickDialContent}>
+          <View style={styles.emergencyQuickDialHeader}>
+            <Ionicons name="call" size={20} color="#EF4444" />
+            <Text style={styles.emergencyQuickDialTitle}>Emergency Quick Dial</Text>
+          </View>
+          <TouchableOpacity 
+            style={styles.emergencyCallButton}
+            onPress={() => handleContactPress('111')}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="call" size={24} color="#ffffff" />
+            <Text style={styles.emergencyCallButtonText}>CALL 111 NOW</Text>
+          </TouchableOpacity>
+          <Text style={styles.emergencyCallDescription}>
+            Police • Fire • Ambulance • Emergency Services
+          </Text>
+          
+          <View style={styles.civilDefenceContainer}>
+            <TouchableOpacity 
+              style={styles.civilDefenceButton}
+              onPress={() => handleContactPress('https://civildefence.govt.nz')}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="shield" size={16} color="#2563EB" />
+              <Text style={styles.civilDefenceButtonText}>Civil Defence Emergency Management</Text>
+              <Ionicons name="open" size={12} color="#2563EB" />
+            </TouchableOpacity>
+          </View>
+        </CardContent>
+      </Card>
+
       {/* Safety Checklists */}
       <View style={styles.checklistsContainer}>
         {safetyChecklists.map(checklist => {
@@ -235,90 +295,109 @@ export default function Info() {
       <Card style={styles.emergencyCardWithBackground}>
         <CardHeader style={styles.emergencyHeader}>
           <CardTitle style={styles.emergencyTitle}>
-            <Ionicons name="warning" size={20} color="#EF4444" />
+            <Ionicons name="call" size={20} color="#EF4444" />
             <Text style={styles.emergencyTitleText}>Emergency Contacts</Text>
           </CardTitle>
         </CardHeader>
         <CardContent style={styles.emergencyContent}>
           <TouchableOpacity 
-            style={styles.contactRow}
+            style={styles.primaryEmergencyButton}
             onPress={() => handleContactPress('111')}
+            activeOpacity={0.8}
           >
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>Emergency Services</Text>
-              <Text style={styles.contactSubtext}>Police, Fire, Ambulance</Text>
-            </View>
-            <Text style={[styles.contactValue, { color: '#EF4444' }]}>111</Text>
+            <Ionicons name="call" size={20} color="#ffffff" />
+            <Text style={styles.primaryEmergencyButtonText}>Emergency Services - 111</Text>
           </TouchableOpacity>
           
-          <View style={styles.contactDivider} />
-          
-          <TouchableOpacity 
-            style={styles.contactRow}
-            onPress={() => handleContactPress('0800 GET READY')}
-          >
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>Civil Defence</Text>
-              <Text style={styles.contactSubtext}>Emergency preparedness</Text>
-            </View>
-            <Text style={[styles.contactValue, { color: '#2563EB' }]}>0800 GET READY</Text>
-          </TouchableOpacity>
-          
-          <View style={styles.contactDivider} />
-          
-          <TouchableOpacity 
-            style={styles.contactRow}
-            onPress={() => handleContactPress('1737')}
-          >
-            <View style={styles.contactInfo}>
-              <Text style={styles.contactLabel}>National Crisis Helpline</Text>
-              <Text style={styles.contactSubtext}>Mental health support</Text>
-            </View>
-            <Text style={[styles.contactValue, { color: '#2563EB' }]}>1737</Text>
-          </TouchableOpacity>
+          <View style={styles.secondaryContactsContainer}>
+            <TouchableOpacity 
+              style={styles.secondaryContactButton}
+              onPress={() => handleContactPress('0800438732')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactLabel}>Civil Defence</Text>
+              </View>
+              <Text style={[styles.contactValue, { color: '#2563EB' }]}>0800 GET READY</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.secondaryContactButton}
+              onPress={() => handleContactPress('1737')}
+              activeOpacity={0.7}
+            >
+              <View style={styles.contactInfo}>
+                <Text style={styles.contactLabel}>Crisis Helpline</Text>
+              </View>
+              <Text style={[styles.contactValue, { color: '#2563EB' }]}>1737</Text>
+            </TouchableOpacity>
+          </View>
         </CardContent>
       </Card>
 
-      {/* Additional Resources */}
+      {/* Official Resources */}
       <Card style={styles.resourcesCard}>
         <CardHeader>
           <CardTitle style={styles.resourcesTitle}>
-            <Ionicons name="globe" size={20} color="#10B981" />
-            <Text style={styles.resourcesTitleText}>Additional Resources</Text>
+            <Ionicons name="open" size={20} color="#10B981" />
+            <Text style={styles.resourcesTitleText}>Official Resources</Text>
           </CardTitle>
         </CardHeader>
         <CardContent style={styles.resourcesContent}>
           <Text style={styles.resourcesDescription}>
-            For more detailed emergency preparedness information, visit:
+            Trusted New Zealand government sources for emergency information:
           </Text>
           <View style={styles.resourcesList}>
             <TouchableOpacity 
-              style={styles.resourceItem}
+              style={styles.enhancedResourceItem}
               onPress={() => handleContactPress('https://getready.govt.nz')}
+              activeOpacity={0.7}
             >
-              <Ionicons name="globe" size={16} color="#10B981" />
-              <Text style={styles.resourceText}>getready.govt.nz</Text>
+              <Ionicons name="shield-checkmark" size={16} color="#2563EB" />
+              <View style={styles.resourceTextContainer}>
+                <Text style={styles.resourceTitle}>Get Ready</Text>
+                <Text style={styles.resourceSubtitle}>Emergency preparedness guide</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
             </TouchableOpacity>
+            
             <TouchableOpacity 
-              style={styles.resourceItem}
+              style={styles.enhancedResourceItem}
               onPress={() => handleContactPress('https://civildefence.govt.nz')}
+              activeOpacity={0.7}
             >
-              <Ionicons name="shield" size={16} color="#2563EB" />
-              <Text style={styles.resourceText}>civildefence.govt.nz</Text>
+              <Ionicons name="shield" size={16} color="#1D4ED8" />
+              <View style={styles.resourceTextContainer}>
+                <Text style={styles.resourceTitle}>Civil Defence</Text>
+                <Text style={styles.resourceSubtitle}>Emergency management</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
             </TouchableOpacity>
+            
             <TouchableOpacity 
-              style={styles.resourceItem}
-              onPress={() => handleContactPress('https://metservice.com')}
+              style={styles.enhancedResourceItem}
+              onPress={() => handleContactPress('https://www.metservice.com/warnings/home')}
+              activeOpacity={0.7}
             >
-              <Ionicons name="cloudy" size={16} color="#F59E0B" />
-              <Text style={styles.resourceText}>MetService weather warnings</Text>
+              <Ionicons name="cloud" size={16} color="#059669" />
+              <View style={styles.resourceTextContainer}>
+                <Text style={styles.resourceTitle}>MetService</Text>
+                <Text style={styles.resourceSubtitle}>Weather warnings & forecasts</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
             </TouchableOpacity>
+            
             <TouchableOpacity 
-              style={styles.resourceItem}
-              onPress={() => handleContactPress('https://geonet.org.nz')}
+              style={styles.enhancedResourceItem}
+              onPress={() => handleContactPress('https://www.geonet.org.nz')}
+              activeOpacity={0.7}
             >
-              <Ionicons name="flash" size={16} color="#EF4444" />
-              <Text style={styles.resourceText}>GeoNet earthquake information</Text>
+              <Ionicons name="pulse" size={16} color="#DC2626" />
+              <View style={styles.resourceTextContainer}>
+                <Text style={styles.resourceTitle}>GeoNet</Text>
+                <Text style={styles.resourceSubtitle}>Earthquake & volcano monitoring</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={16} color="#6B7280" />
             </TouchableOpacity>
           </View>
         </CardContent>
@@ -529,5 +608,189 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#374151',
     fontWeight: '500',
+  },
+  // New styles for trusted data sources
+  trustedSourcesCard: {
+    margin: 16,
+    borderWidth: 1,
+    borderColor: '#DBEAFE',
+    backgroundColor: '#EFF6FF',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  trustedSourcesContent: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  trustedSourcesHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  trustedSourcesTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#2563EB',
+  },
+  sourceBadges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  sourceBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderRadius: 12,
+  },
+  sourceBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  trustedSourcesDescription: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  // Emergency Quick Dial styles
+  emergencyQuickDialCard: {
+    margin: 16,
+    borderWidth: 1,
+    borderColor: '#FECACA',
+    backgroundColor: '#FEF2F2',
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  emergencyQuickDialContent: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  emergencyQuickDialHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 16,
+  },
+  emergencyQuickDialTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#EF4444',
+  },
+  emergencyCallButton: {
+    backgroundColor: '#EF4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    width: '100%',
+    marginBottom: 8,
+  },
+  emergencyCallButtonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  emergencyCallDescription: {
+    fontSize: 12,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  civilDefenceContainer: {
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#FECACA',
+    width: '100%',
+  },
+  civilDefenceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#2563EB',
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+  },
+  civilDefenceButtonText: {
+    color: '#2563EB',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  // Enhanced emergency contacts styles
+  primaryEmergencyButton: {
+    backgroundColor: '#EF4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  primaryEmergencyButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  secondaryContactsContainer: {
+    gap: 8,
+  },
+  secondaryContactButton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#2563EB',
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+  },
+  // Enhanced resource items
+  enhancedResourceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+  },
+  resourceTextContainer: {
+    flex: 1,
+  },
+  resourceTitle: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#111827',
+    marginBottom: 2,
+  },
+  resourceSubtitle: {
+    fontSize: 12,
+    color: '#6B7280',
   },
 });

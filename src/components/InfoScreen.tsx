@@ -1,6 +1,8 @@
-import { ChevronDown, ChevronRight, Droplets, Zap, Wind, CheckCircle } from 'lucide-react';
+import { ChevronDown, ChevronRight, Droplets, Zap, Wind, CheckCircle, Phone, ExternalLink, Shield, Globe, Cloud, Activity } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
 interface SafetyItem {
@@ -159,6 +161,18 @@ export function InfoScreen() {
     });
   };
 
+  const handleEmergencyCall = () => {
+    window.open('tel:111', '_self');
+  };
+
+  const handleCivilDefence = () => {
+    window.open('https://civildefence.govt.nz', '_blank');
+  };
+
+  const openLink = (url: string) => {
+    window.open(url, '_blank');
+  };
+
   return (
     <div className="p-4 space-y-6">
       <div className="text-center">
@@ -169,6 +183,69 @@ export function InfoScreen() {
           Essential checklists for emergency preparedness
         </p>
       </div>
+
+      {/* Trusted Data Sources Badge */}
+      <Card className="bg-primary/5 border-primary/20">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <Shield className="w-5 h-5 text-primary" />
+            <span className="font-semibold text-primary">Trusted Data Sources</span>
+          </div>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-200">
+              <Activity className="w-3 h-3 mr-1" />
+              GeoNet NZ
+            </Badge>
+            <Badge variant="secondary" className="bg-orange-50 text-orange-700 border-orange-200">
+              <Globe className="w-3 h-3 mr-1" />
+              NZTA
+            </Badge>
+            <Badge variant="secondary" className="bg-green-50 text-green-700 border-green-200">
+              <Cloud className="w-3 h-3 mr-1" />
+              MetService
+            </Badge>
+          </div>
+          <p className="text-xs text-muted-foreground text-center mt-2">
+            Official New Zealand government data sources for real-time emergency information
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Emergency Quick Dial */}
+      <Card className="bg-destructive/5 border-destructive/20">
+        <CardContent className="p-4">
+          <div className="text-center space-y-3">
+            <h3 className="font-semibold text-destructive flex items-center justify-center gap-2">
+              <Phone className="w-5 h-5" />
+              Emergency Quick Dial
+            </h3>
+            <Button 
+              onClick={handleEmergencyCall}
+              size="lg"
+              className="w-full bg-destructive hover:bg-destructive/90 text-white font-bold text-xl py-4"
+            >
+              <Phone className="w-6 h-6 mr-3" />
+              CALL 111 NOW
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Police • Fire • Ambulance • Emergency Services
+            </p>
+            
+            <div className="pt-2 border-t border-destructive/20">
+              <Button 
+                onClick={handleCivilDefence}
+                variant="outline"
+                size="sm"
+                className="w-full border-primary text-primary hover:bg-primary hover:text-white"
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                Civil Defence Emergency Management
+                <ExternalLink className="w-3 h-3 ml-2" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="space-y-4">
         {safetyChecklists.map(checklist => {
@@ -219,20 +296,41 @@ export function InfoScreen() {
       {/* Emergency Contacts */}
       <Card className="shadow-sm bg-destructive/5 border-destructive/20">
         <CardHeader>
-          <CardTitle className="text-destructive">Emergency Contacts</CardTitle>
+          <CardTitle className="text-destructive flex items-center gap-2">
+            <Phone className="w-5 h-5" />
+            Emergency Contacts
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Emergency Services</span>
-            <span className="text-destructive font-semibold">111</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="font-medium">Civil Defence</span>
-            <span className="text-primary font-semibold">0800 GET READY</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="font-medium">National Crisis Helpline</span>
-            <span className="text-primary font-semibold">1737</span>
+        <CardContent className="space-y-3">
+          <Button
+            onClick={() => window.open('tel:111', '_self')}
+            variant="destructive"
+            size="lg"
+            className="w-full font-bold text-lg"
+          >
+            <Phone className="w-5 h-5 mr-2" />
+            Emergency Services - 111
+          </Button>
+          
+          <div className="grid grid-cols-1 gap-2">
+            <Button
+              onClick={() => window.open('tel:0800438732', '_self')}
+              variant="outline"
+              size="sm"
+              className="justify-between border-primary text-primary hover:bg-primary hover:text-white"
+            >
+              <span>Civil Defence</span>
+              <span className="font-semibold">0800 GET READY</span>
+            </Button>
+            <Button
+              onClick={() => window.open('tel:1737', '_self')}
+              variant="outline"
+              size="sm"
+              className="justify-between border-primary text-primary hover:bg-primary hover:text-white"
+            >
+              <span>Crisis Helpline</span>
+              <span className="font-semibold">1737</span>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -240,18 +338,73 @@ export function InfoScreen() {
       {/* Additional Resources */}
       <Card className="shadow-sm">
         <CardHeader>
-          <CardTitle>Additional Resources</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ExternalLink className="w-5 h-5" />
+            Official Resources
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            For more detailed emergency preparedness information, visit:
+            Trusted New Zealand government sources for emergency information:
           </p>
-          <ul className="text-sm space-y-1">
-            <li>• getready.govt.nz</li>
-            <li>• civildefence.govt.nz</li>
-            <li>• MetService weather warnings</li>
-            <li>• GeoNet earthquake information</li>
-          </ul>
+          
+          <div className="grid grid-cols-1 gap-2">
+            <Button
+              onClick={() => openLink('https://getready.govt.nz')}
+              variant="ghost"
+              size="sm"
+              className="justify-start h-auto p-3 border border-border hover:bg-muted"
+            >
+              <Shield className="w-4 h-4 mr-3 text-primary flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-medium">Get Ready</div>
+                <div className="text-xs text-muted-foreground">Emergency preparedness guide</div>
+              </div>
+              <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground" />
+            </Button>
+            
+            <Button
+              onClick={() => openLink('https://civildefence.govt.nz')}
+              variant="ghost"
+              size="sm"
+              className="justify-start h-auto p-3 border border-border hover:bg-muted"
+            >
+              <Shield className="w-4 h-4 mr-3 text-blue-600 flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-medium">Civil Defence</div>
+                <div className="text-xs text-muted-foreground">Emergency management</div>
+              </div>
+              <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground" />
+            </Button>
+            
+            <Button
+              onClick={() => openLink('https://www.metservice.com/warnings/home')}
+              variant="ghost"
+              size="sm"
+              className="justify-start h-auto p-3 border border-border hover:bg-muted"
+            >
+              <Cloud className="w-4 h-4 mr-3 text-green-600 flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-medium">MetService</div>
+                <div className="text-xs text-muted-foreground">Weather warnings & forecasts</div>
+              </div>
+              <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground" />
+            </Button>
+            
+            <Button
+              onClick={() => openLink('https://www.geonet.org.nz')}
+              variant="ghost"
+              size="sm"
+              className="justify-start h-auto p-3 border border-border hover:bg-muted"
+            >
+              <Activity className="w-4 h-4 mr-3 text-red-600 flex-shrink-0" />
+              <div className="text-left">
+                <div className="font-medium">GeoNet</div>
+                <div className="text-xs text-muted-foreground">Earthquake & volcano monitoring</div>
+              </div>
+              <ExternalLink className="w-3 h-3 ml-auto text-muted-foreground" />
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
