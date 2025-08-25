@@ -1,8 +1,8 @@
-import { Home, Map, Car, FileText, Info } from 'lucide-react';
+import { Home, Map, Car, Cloud, FileText, Info } from 'lucide-react';
 
 interface BottomNavProps {
   currentScreen: string;
-  onNavigate: (screen: 'home' | 'map' | 'roads' | 'report' | 'info') => void;
+  onNavigate: (screen: 'home' | 'map' | 'roads' | 'weather' | 'report' | 'info') => void;
 }
 
 export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
@@ -10,7 +10,7 @@ export function BottomNav({ currentScreen, onNavigate }: BottomNavProps) {
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'map', icon: Map, label: 'Map' },
     { id: 'roads', icon: Car, label: 'Roads' },
-    { id: 'report', icon: FileText, label: 'Report' },
+    { id: 'weather', icon: Cloud, label: 'Weather' },
     { id: 'info', icon: Info, label: 'Info' },
   ] as const;
 

@@ -1,11 +1,11 @@
 import { useState, useEffect, Component } from 'react';
 import { createPortal } from 'react-dom';
-import { MapPin, Circle, Triangle } from 'lucide-react';
+import { MapPin, Circle, Triangle, Cloud } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
-import { DataService, QuakeData, RoadData, CommunityReport, NZ_CITY_COORDS } from '../services/mockData';
+import { DataService, QuakeData, RoadData, CommunityReport, NZ_CITY_COORDS, WeatherWarning } from '../services/mockData';
 
 // Import Leaflet CSS
 import 'leaflet/dist/leaflet.css';
@@ -42,7 +42,7 @@ const COLORS = {
 };
 
 // Enhanced custom marker icons with exact design system colors
-const createCustomIcon = (type: 'quake' | 'roading' | 'community', magnitude?: number) => {
+const createCustomIcon = (type: 'quake' | 'roading' | 'community' | 'weather', magnitude?: number, color?: string) => {
   const getMarkerConfig = () => {
     switch (type) {
       case 'quake':
@@ -65,6 +65,13 @@ const createCustomIcon = (type: 'quake' | 'roading' | 'community', magnitude?: n
           border: '#059669',
           symbol: '📍',
           size: 28
+        };
+      case 'weather':
+        return {
+          color: color || '#6366F1', // Indigo for weather
+          border: color ? `${color}CC` : '#4F46E5',
+          symbol: '🌧️',
+          size: 30
         };
       default:
         return {
@@ -581,7 +588,7 @@ interface MapScreenProps {
 
 interface MapMarker {
   id: string;
-  type: 'quake' | 'roading' | 'community';
+  type: 'quake' | 'roading' | 'community' | 'weather';
   lat: number;
   lng: number;
   title: string;
@@ -589,11 +596,14 @@ interface MapMarker {
   magnitude?: number;
   severity?: string;
   city: string;
+  regions?: string[];
+  weatherType?: WeatherWarning['type'];
+  color?: string;
 }
 
 export function MapScreen({ subscriptions }: MapScreenProps) {
   const [activeFilters, setActiveFilters] = useState<Set<string>>(
-    new Set(['quakes', 'roading', 'community'])
+    new Set(['quakes', 'roading', 'community', 'weather'])
   );
   const [selectedMarker, setSelectedMarker] = useState<MapMarker | null>(null);
   const [detailedRoadView, setDetailedRoadView] = useState<MapMarker | null>(null);
@@ -615,10 +625,11 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
           community: subscriptions.some(sub => sub.community),
         };
 
-        const [quakeData, roadData, communityData] = await Promise.all([
+        const [quakeData, roadData, communityData, weatherData] = await Promise.all([
           enabledAlerts.quakes ? DataService.getEarthquakeData(subscribedCities) : Promise.resolve([]),
           enabledAlerts.roading ? DataService.getRoadData(subscribedCities) : Promise.resolve([]),
           enabledAlerts.community ? DataService.getCommunityData(subscribedCities) : Promise.resolve([]),
+          DataService.getWeatherWarnings(subscribedCities),
         ]);
 
         const allMarkers: MapMarker[] = [
@@ -651,6 +662,19 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
             description: report.description,
             severity: report.severity,
             city: report.category,
+          })),
+          ...weatherData.map((warning: WeatherWarning) => ({
+            id: warning.id,
+            type: 'weather' as const,
+            lat: warning.coordinates?.lat || -41.0,
+            lng: warning.coordinates?.lng || 174.0,
+            title: warning.title,
+            description: warning.description,
+            severity: warning.severity,
+            city: warning.regions[0] || 'New Zealand',
+            regions: warning.regions,
+            weatherType: warning.type,
+            color: warning.color,
           })),
         ];
 
@@ -689,7 +713,7 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
   );
 
   // Helper function for marker icons in popups and legends
-  const getMarkerIcon = (type: string) => {
+  const getMarkerIcon = (type: string, color?: string) => {
     switch (type) {
       case 'quake':
         return <Circle className="w-4 h-4 fill-current" style={{ color: COLORS.primary }} />;
@@ -697,6 +721,8 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
         return <Triangle className="w-4 h-4 fill-current" style={{ color: COLORS.warning }} />;
       case 'community':
         return <MapPin className="w-4 h-4 fill-current" style={{ color: COLORS.accent }} />;
+      case 'weather':
+        return <Cloud className="w-4 h-4 fill-current" style={{ color: color || '#6366F1' }} />;
       default:
         return <Circle className="w-4 h-4" />;
     }
@@ -933,6 +959,24 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
           <MapPin className="w-3 h-3 mr-1 fill-current" />
           Community ({markers.filter(m => m.type === 'community').length})
         </Badge>
+        
+        <Badge
+          variant={activeFilters.has('weather') ? 'default' : 'secondary'}
+          className={`cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md text-xs px-3 py-1.5 border-2 ${
+            activeFilters.has('weather') 
+              ? 'text-white' 
+              : 'bg-white hover:bg-gray-50 text-gray-700'
+          }`}
+          style={{
+            backgroundColor: activeFilters.has('weather') ? COLORS.primary : COLORS.white,
+            borderColor: activeFilters.has('weather') ? COLORS.primary : COLORS.gray[300],
+            color: activeFilters.has('weather') ? COLORS.white : COLORS.gray[700]
+          }}
+          onClick={() => toggleFilter('weather')}
+        >
+          <Cloud className="w-3 h-3 mr-1 fill-current" />
+          Weather ({markers.filter(m => m.type === 'weather').length})
+        </Badge>
       </div>
 
       {/* Map Container - Contained within app layout */}
@@ -1014,7 +1058,7 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
                   <Marker
                     key={marker.id}
                     position={[marker.lat, marker.lng]}
-                    icon={createCustomIcon(marker.type, marker.magnitude)}
+                    icon={createCustomIcon(marker.type, marker.magnitude, marker.color)}
                     eventHandlers={{
                       click: () => {
                         setSelectedMarker(marker);
@@ -1027,7 +1071,7 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
                           <h4 className="font-semibold text-sm" style={{ color: COLORS.gray[900] }}>
                             {marker.title}
                           </h4>
-                          {getMarkerIcon(marker.type)}
+                          {getMarkerIcon(marker.type, marker.color)}
                         </div>
                         <p className="text-sm mb-3" style={{ color: COLORS.gray[600] }}>
                           {marker.description}
@@ -1046,6 +1090,14 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
                             color: marker.magnitude && marker.magnitude >= 4 ? COLORS.error : COLORS.primary
                           }}>
                             🌍 Real-time GeoNet data
+                          </div>
+                        )}
+                        {marker.type === 'weather' && (
+                          <div className="text-xs mb-2 px-2 py-1 rounded" style={{ 
+                            backgroundColor: '#f0f9ff',
+                            color: '#6366F1'
+                          }}>
+                            🌤️ MetService weather warning
                           </div>
                         )}
                         <Button 
@@ -1076,8 +1128,8 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
             }}
           >
             <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {getMarkerIcon(selectedMarker.type)}
+                          <div className="flex items-center gap-2">
+              {getMarkerIcon(selectedMarker.type, selectedMarker.color)}
                 <h4 className="font-semibold text-sm" style={{ color: COLORS.gray[900] }}>
                   {selectedMarker.title}
                 </h4>
@@ -1140,6 +1192,10 @@ export function MapScreen({ subscriptions }: MapScreenProps) {
             <div className="flex items-center gap-2 text-xs">
               <MapPin className="w-3 h-3 fill-current" style={{ color: COLORS.accent }} />
               <span style={{ color: COLORS.gray[700] }}>Community</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs">
+              <Cloud className="w-3 h-3 fill-current" style={{ color: '#6366F1' }} />
+              <span style={{ color: COLORS.gray[700] }}>Weather</span>
             </div>
           </div>
         </div>

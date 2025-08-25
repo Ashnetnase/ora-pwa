@@ -5,12 +5,13 @@ import { MapScreen } from './components/MapScreen';
 import { RoadsScreen } from './components/RoadsScreen';
 import { ReportScreen } from './components/ReportScreen';
 import { InfoScreen } from './components/InfoScreen';
+import { WeatherScreen } from './components/WeatherScreen';
 import { BottomNav } from './components/BottomNav';
 import { Header } from './components/Header';
 import { Toaster } from './components/ui/sonner';
 import { ThemeProvider } from './contexts/ThemeContext';
 
-type Screen = 'login' | 'home' | 'map' | 'roads' | 'report' | 'info';
+type Screen = 'login' | 'home' | 'map' | 'roads' | 'weather' | 'report' | 'info';
 
 interface CitySubscription {
   id: string;
@@ -99,6 +100,8 @@ function AppContent() {
         return <MapScreen subscriptions={subscriptions} />;
       case 'roads':
         return <RoadsScreen subscriptions={subscriptions} />;
+      case 'weather':
+        return <WeatherScreen subscriptions={subscriptions} />;
       case 'report':
         return <ReportScreen />;
       case 'info':

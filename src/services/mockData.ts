@@ -4,6 +4,7 @@
 import { NZTAService } from './nztaApi';
 import { GeoNetService, GeoNetQuake } from './geonetApi';
 import { NZRegionService } from './nzRegions';
+import { MetServiceAPI, WeatherWarning, WeatherForecast } from './metserviceApi';
 
 export interface QuakeData {
   id: string;
@@ -218,6 +219,7 @@ export class DataService {
     console.log('Clearing API cache...');
     NZTAService.clearCache();
     GeoNetService.clearCache();
+    MetServiceAPI.clearCache();
   }
 
   /**
@@ -389,5 +391,59 @@ export class DataService {
       return MOCK_COMMUNITY.filter(report => cities.includes(report.city));
     }
     return MOCK_COMMUNITY;
+  }
+
+  // MetService API integration for weather warnings and forecasts
+  static async getWeatherWarnings(cities?: string[]): Promise<WeatherWarning[]> {
+    try {
+      console.log('Fetching weather warnings from MetService API...');
+      
+      const warnings = await MetServiceAPI.getWeatherWarnings();
+      
+      if (cities && cities.length > 0) {
+        // Filter warnings by subscribed cities/regions
+        return warnings.filter(warning =>
+          warning.regions.some(warningRegion =>
+            cities.some(city =>
+              warningRegion.toLowerCase().includes(city.toLowerCase()) ||
+              city.toLowerCase().includes(warningRegion.toLowerCase())
+            )
+          )
+        );
+      }
+      
+      return warnings;
+    } catch (error) {
+      console.error('Failed to fetch weather warnings:', error);
+      return [];
+    }
+  }
+
+  static async getWeatherForecast(cities?: string[]): Promise<WeatherForecast[]> {
+    try {
+      console.log('Fetching weather forecasts from MetService API...');
+      
+      if (!cities || cities.length === 0) {
+        return [];
+      }
+      
+      return await MetServiceAPI.getWeatherForecast(cities);
+    } catch (error) {
+      console.error('Failed to fetch weather forecasts:', error);
+      return [];
+    }
+  }
+
+  static async getWeatherDataForSubscriptions(subscriptions: Array<{name: string; type: 'city' | 'region'}>): Promise<{
+    warnings: WeatherWarning[];
+    forecasts: WeatherForecast[];
+  }> {
+    try {
+      const cities = this.expandSubscriptions(subscriptions);
+      return await MetServiceAPI.getWeatherDataForSubscriptions(subscriptions);
+    } catch (error) {
+      console.error('Failed to fetch weather data for subscriptions:', error);
+      return { warnings: [], forecasts: [] };
+    }
   }
 }
