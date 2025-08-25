@@ -1,56 +1,158 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from "react-native";
 
-import { cn } from "../../utils"
-
-const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
-
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+interface ButtonProps {
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
+  size?: 'default' | 'sm' | 'lg' | 'icon';
+  disabled?: boolean;
+  onPress?: () => void;
+  onClick?: () => void; // For compatibility with existing code
+  style?: ViewStyle;
+  textStyle?: TextStyle;
+  children?: React.ReactNode;
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    )
-  }
-)
-Button.displayName = "Button"
+function Button({
+  variant = 'default',
+  size = 'default',
+  disabled = false,
+  onPress,
+  onClick,
+  style,
+  textStyle,
+  children,
+  ...props
+}: ButtonProps) {
+  
+  const handlePress = onPress || onClick;
 
-export { Button, buttonVariants }
+  const getVariantStyles = () => {
+    switch (variant) {
+      case 'destructive':
+        return {
+          backgroundColor: disabled ? '#FECACA' : '#EF4444',
+          borderColor: '#EF4444',
+          borderWidth: 1,
+        };
+      case 'outline':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: '#E5E7EB',
+          borderWidth: 1,
+        };
+      case 'secondary':
+        return {
+          backgroundColor: disabled ? '#E5E7EB' : '#F3F4F6',
+          borderColor: '#E5E7EB',
+          borderWidth: 1,
+        };
+      case 'ghost':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          borderWidth: 0,
+        };
+      case 'link':
+        return {
+          backgroundColor: 'transparent',
+          borderColor: 'transparent',
+          borderWidth: 0,
+        };
+      default:
+        return {
+          backgroundColor: disabled ? '#93C5FD' : '#2563EB',
+          borderColor: '#2563EB',
+          borderWidth: 1,
+        };
+    }
+  };
+
+  const getSizeStyles = () => {
+    switch (size) {
+      case 'sm':
+        return {
+          height: 36,
+          paddingHorizontal: 12,
+          borderRadius: 6,
+        };
+      case 'lg':
+        return {
+          height: 44,
+          paddingHorizontal: 32,
+          borderRadius: 6,
+        };
+      case 'icon':
+        return {
+          height: 40,
+          width: 40,
+          paddingHorizontal: 0,
+          borderRadius: 6,
+        };
+      default:
+        return {
+          height: 40,
+          paddingHorizontal: 16,
+          borderRadius: 6,
+        };
+    }
+  };
+
+  const getTextStyles = () => {
+    const baseTextStyle = {
+      fontSize: size === 'sm' ? 14 : size === 'lg' ? 16 : 14,
+      fontWeight: '500' as const,
+      textAlign: 'center' as const,
+    };
+
+    switch (variant) {
+      case 'destructive':
+        return { ...baseTextStyle, color: '#FFFFFF' };
+      case 'outline':
+        return { ...baseTextStyle, color: '#374151' };
+      case 'secondary':
+        return { ...baseTextStyle, color: '#374151' };
+      case 'ghost':
+        return { ...baseTextStyle, color: '#374151' };
+      case 'link':
+        return { ...baseTextStyle, color: '#2563EB', textDecorationLine: 'underline' as const };
+      default:
+        return { ...baseTextStyle, color: '#FFFFFF' };
+    }
+  };
+
+  const variantStyles = getVariantStyles();
+  const sizeStyles = getSizeStyles();
+  const textStyles = getTextStyles();
+
+  return (
+    <TouchableOpacity
+      style={[
+        styles.base,
+        variantStyles,
+        sizeStyles,
+        disabled && styles.disabled,
+        style,
+      ]}
+      onPress={handlePress}
+      disabled={disabled}
+      activeOpacity={disabled ? 1 : 0.7}
+      {...props}
+    >
+      {children}
+    </TouchableOpacity>
+  );
+}
+
+const styles = StyleSheet.create({
+  base: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+});
+
+export { Button };

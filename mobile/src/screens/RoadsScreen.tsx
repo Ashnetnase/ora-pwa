@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
-import { Clock, MapPin } from 'lucide-react';
-import { Card, CardContent } from './ui/card';
-import { Badge } from './ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import React, { useState, useEffect } from 'react';
+import { View, Text } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { Card, CardContent } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { DataService, RoadData } from '../services/mockData';
 
 interface RoadsScreenProps {
@@ -92,15 +93,15 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
 
   if (subscribedCities.length === 0) {
     return (
-      <div className="p-4 h-full flex items-center justify-center">
-        <div className="text-center">
-          <MapPin className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">No Road Alerts Enabled</h3>
-          <p className="text-muted-foreground max-w-sm">
+      <View style={{ padding: 16, flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ alignItems: 'center' }}>
+          <Ionicons name="location" size={48} color="#6B7280" style={{ marginBottom: 16 }} />
+          <Text style={{ fontSize: 18, fontWeight: '500', color: '#111827', marginBottom: 8 }}>No Road Alerts Enabled</Text>
+          <Text style={{ color: '#6B7280', textAlign: 'center', maxWidth: 300 }}>
             Enable road alerts for your cities in the dashboard to see road conditions here
-          </p>
-        </div>
-      </div>
+          </Text>
+        </View>
+      </View>
     );
   }
 

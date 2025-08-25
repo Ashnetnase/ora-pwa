@@ -1,24 +1,24 @@
 import * as React from "react"
 import { TouchableOpacity, Text, StyleSheet, ViewStyle, TextStyle } from "react-native"
-import { LucideIcon, AlertTriangle, Cloud, Car, List, Ban, Calendar, CheckCircle, BellOff, MapPin, Clock, Info, Plus, X, Home, FileText } from "lucide-react"
+import { Ionicons } from '@expo/vector-icons'
 
 // Common icon mappings for easy use
 const iconMap = {
-  'warning': AlertTriangle,
-  'cloud': Cloud, 
-  'traffic': Car,
-  'list': List,
-  'block': Ban,
-  'schedule': Calendar,
-  'check-circle': CheckCircle,
-  'do-not-disturb': BellOff,
-  'map-pin': MapPin,
-  'clock': Clock,
-  'info': Info,
-  'plus': Plus,
-  'x': X,
-  'home': Home,
-  'file-text': FileText,
+  'warning': 'warning',
+  'cloud': 'cloud', 
+  'traffic': 'car',
+  'list': 'list',
+  'block': 'ban',
+  'schedule': 'calendar',
+  'check-circle': 'checkmark-circle',
+  'do-not-disturb': 'notifications-off',
+  'map-pin': 'location',
+  'clock': 'time',
+  'info': 'information-circle',
+  'plus': 'add',
+  'x': 'close',
+  'home': 'home',
+  'file-text': 'document-text',
 } as const
 
 interface ToggleProps {
@@ -28,7 +28,7 @@ interface ToggleProps {
   variant?: "default" | "outline"
   size?: "default" | "sm" | "lg"
   children?: React.ReactNode
-  icon?: keyof typeof iconMap | LucideIcon
+  icon?: keyof typeof iconMap | string
   style?: ViewStyle
   textStyle?: TextStyle
   className?: string
@@ -92,9 +92,10 @@ function Toggle({
     >
       {icon && (
         (() => {
-          const IconComponent = typeof icon === 'string' ? iconMap[icon as keyof typeof iconMap] : icon
-          return IconComponent ? (
-            <IconComponent 
+          const iconName = typeof icon === 'string' ? (iconMap[icon as keyof typeof iconMap] || icon) : icon
+          return iconName ? (
+            <Ionicons 
+              name={iconName as any}
               size={getIconSize()} 
               color={pressed ? "#FFFFFF" : "#6B7280"}
               style={children ? styles.iconWithText : undefined}

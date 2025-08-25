@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Linking } from 'react-native';
-import { ChevronDown, ChevronRight, Droplets, Zap, Wind, CheckCircle, Phone, Mail, Globe, Shield, AlertTriangle } from 'lucide-react';
+import { Ionicons } from '@expo/vector-icons';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 
 interface SafetyItem {
@@ -22,127 +22,127 @@ const safetyChecklists: SafetyChecklist[] = [
   {
     id: 'flood',
     title: 'Flood Safety',
-    icon: <Droplets size={20} color="#ffffff" />,
+    icon: <Ionicons name="water" size={20} color="#ffffff" />,
     color: '#2563EB',
     bgColor: '#EFF6FF',
     items: [
       {
         id: 'f1',
         text: 'Move to higher ground immediately',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'f2',
         text: 'Avoid walking or driving through flood water',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'f3',
         text: 'Turn off electricity at the main switch',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'f4',
         text: 'Have emergency supplies ready (water, food, radio)',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'f5',
         text: 'Stay informed via official emergency channels',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'f6',
         text: 'Do not return home until authorities say it\'s safe',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
     ],
   },
   {
     id: 'earthquake',
     title: 'Earthquake Safety',
-    icon: <Zap size={20} color="#ffffff" />,
+    icon: <Ionicons name="flash" size={20} color="#ffffff" />,
     color: '#F59E0B',
     bgColor: '#FFFBEB',
     items: [
       {
         id: 'e1',
         text: 'Drop, Cover, and Hold On during shaking',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'e2',
         text: 'Stay away from windows and heavy objects',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'e3',
         text: 'If outdoors, move away from buildings and power lines',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'e4',
         text: 'Check for injuries and hazards after shaking stops',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'e5',
         text: 'Be prepared for aftershocks',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'e6',
         text: 'Have a family emergency plan and meeting place',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 'e7',
         text: 'Keep emergency kit stocked (3 days supplies)',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
     ],
   },
   {
     id: 'storm',
     title: 'Storm Safety',
-    icon: <Wind size={20} color="#ffffff" />,
+    icon: <Ionicons name="cloudy" size={20} color="#ffffff" />,
     color: '#6B7280',
     bgColor: '#F9FAFB',
     items: [
       {
         id: 's1',
         text: 'Stay indoors and away from windows',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 's2',
         text: 'Secure outdoor furniture and objects',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 's3',
         text: 'Avoid using electrical appliances',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 's4',
         text: 'Keep flashlights and battery radio ready',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 's5',
         text: 'Monitor weather warnings and updates',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 's6',
         text: 'Avoid driving unless absolutely necessary',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
       {
         id: 's7',
         text: 'Stay away from damaged power lines',
-        icon: <CheckCircle size={16} color="#10B981" />,
+        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
       },
     ],
   },
@@ -203,9 +203,9 @@ export default function Info() {
                 </View>
                 <View style={styles.chevronContainer}>
                   {isOpen ? (
-                    <ChevronDown size={20} color="#6B7280" />
+                    <Ionicons name="chevron-down" size={20} color="#6B7280" />
                   ) : (
-                    <ChevronRight size={20} color="#6B7280" />
+                    <Ionicons name="chevron-forward" size={20} color="#6B7280" />
                   )}
                 </View>
               </TouchableOpacity>
@@ -235,7 +235,7 @@ export default function Info() {
       <Card style={styles.emergencyCardWithBackground}>
         <CardHeader style={styles.emergencyHeader}>
           <CardTitle style={styles.emergencyTitle}>
-            <AlertTriangle size={20} color="#EF4444" />
+            <Ionicons name="warning" size={20} color="#EF4444" />
             <Text style={styles.emergencyTitleText}>Emergency Contacts</Text>
           </CardTitle>
         </CardHeader>
@@ -283,7 +283,7 @@ export default function Info() {
       <Card style={styles.resourcesCard}>
         <CardHeader>
           <CardTitle style={styles.resourcesTitle}>
-            <Globe size={20} color="#10B981" />
+            <Ionicons name="globe" size={20} color="#10B981" />
             <Text style={styles.resourcesTitleText}>Additional Resources</Text>
           </CardTitle>
         </CardHeader>
@@ -296,28 +296,28 @@ export default function Info() {
               style={styles.resourceItem}
               onPress={() => handleContactPress('https://getready.govt.nz')}
             >
-              <Globe size={16} color="#10B981" />
+              <Ionicons name="globe" size={16} color="#10B981" />
               <Text style={styles.resourceText}>getready.govt.nz</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.resourceItem}
               onPress={() => handleContactPress('https://civildefence.govt.nz')}
             >
-              <Shield size={16} color="#2563EB" />
+              <Ionicons name="shield" size={16} color="#2563EB" />
               <Text style={styles.resourceText}>civildefence.govt.nz</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.resourceItem}
               onPress={() => handleContactPress('https://metservice.com')}
             >
-              <Wind size={16} color="#F59E0B" />
+              <Ionicons name="cloudy" size={16} color="#F59E0B" />
               <Text style={styles.resourceText}>MetService weather warnings</Text>
             </TouchableOpacity>
             <TouchableOpacity 
               style={styles.resourceItem}
               onPress={() => handleContactPress('https://geonet.org.nz')}
             >
-              <Zap size={16} color="#EF4444" />
+              <Ionicons name="flash" size={16} color="#EF4444" />
               <Text style={styles.resourceText}>GeoNet earthquake information</Text>
             </TouchableOpacity>
           </View>

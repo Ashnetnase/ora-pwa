@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { AlertTriangle, Clock, MapPin, CheckCircle, XCircle } from 'lucide-react';
+import { Ionicons } from '@expo/vector-icons';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { ToggleGroup } from '../components/ui/toggle-group';
 
 interface RoadData {
@@ -112,13 +111,13 @@ export default function Roads() {
   const getStatusIcon = (status: RoadData['status']) => {
     switch (status) {
       case 'closed':
-        return <XCircle size={20} color="#EF4444" />;
+        return <Ionicons name="close-circle" size={20} color="#EF4444" />;
       case 'planned':
-        return <Clock size={20} color="#F59E0B" />;
+        return <Ionicons name="time" size={20} color="#F59E0B" />;
       case 'clear':
-        return <CheckCircle size={20} color="#10B981" />;
+        return <Ionicons name="checkmark-circle" size={20} color="#10B981" />;
       default:
-        return <AlertTriangle size={20} color="#6B7280" />;
+        return <Ionicons name="warning" size={20} color="#6B7280" />;
     }
   };
 
@@ -152,7 +151,7 @@ export default function Roads() {
         
         <View style={styles.roadFooter}>
           <View style={styles.timeInfo}>
-            <Clock size={16} color="#6B7280" />
+            <Ionicons name="time" size={16} color="#6B7280" />
             <Text style={styles.timeText}>
               Updated {formatTime(road.lastUpdated)}
             </Text>
@@ -160,7 +159,7 @@ export default function Roads() {
           
           {road.estimatedDuration && (
             <View style={styles.durationInfo}>
-              <AlertTriangle size={16} color="#F59E0B" />
+              <Ionicons name="warning" size={16} color="#F59E0B" />
               <Text style={styles.durationText}>
                 Est. {road.estimatedDuration}
               </Text>
@@ -233,7 +232,7 @@ export default function Roads() {
         {filteredRoads.length === 0 ? (
           <Card style={styles.emptyCard}>
             <CardContent style={styles.emptyCardContent}>
-              <AlertTriangle size={48} color="#6B7280" style={styles.emptyIcon} />
+              <Ionicons name="warning" size={48} color="#6B7280" style={styles.emptyIcon} />
               <Text style={styles.emptyTitle}>No roads found</Text>
               <Text style={styles.emptySubtitle}>
                 No roads match the selected filter

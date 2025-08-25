@@ -1,6 +1,6 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Home, MapPin, Car, FileText, Info as InfoIcon } from 'lucide-react';
+import { Ionicons } from '@expo/vector-icons';
 import Dashboard from '../screens/Dashboard';
 import Map from '../screens/Map';
 import Roads from '../screens/Roads';
@@ -22,35 +22,35 @@ export default function Tabs() {
         name="Dashboard" 
         component={Dashboard}
         options={{
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="home" size={size} color={color} />,
         }}
       />
       <Tab.Screen 
         name="Map" 
         component={Map}
         options={{
-          tabBarIcon: ({ color, size }) => <MapPin size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="map" size={size} color={color} />,
         }}
       />
       <Tab.Screen 
         name="Roads" 
         component={Roads}
         options={{
-          tabBarIcon: ({ color, size }) => <Car size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="car" size={size} color={color} />,
         }}
       />
       <Tab.Screen 
         name="Report" 
         component={Report}
         options={{
-          tabBarIcon: ({ color, size }) => <FileText size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="document-text" size={size} color={color} />,
         }}
       />
       <Tab.Screen 
         name="Info" 
         component={Info}
         options={{
-          tabBarIcon: ({ color, size }) => <InfoIcon size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => <Ionicons name="information-circle" size={size} color={color} />,
         }}
       />
     </Tab.Navigator>
