@@ -8,6 +8,7 @@ import { InfoScreen } from './components/InfoScreen';
 import { BottomNav } from './components/BottomNav';
 import { Header } from './components/Header';
 import { Toaster } from './components/ui/sonner';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 type Screen = 'login' | 'home' | 'map' | 'roads' | 'report' | 'info';
 
@@ -21,7 +22,7 @@ interface CitySubscription {
   community: boolean;
 }
 
-export default function App() {
+function AppContent() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('login');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userName, setUserName] = useState('');
@@ -116,5 +117,13 @@ export default function App() {
       <BottomNav currentScreen={currentScreen} onNavigate={setCurrentScreen} />
       <Toaster />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }

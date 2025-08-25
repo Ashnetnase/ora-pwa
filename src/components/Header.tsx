@@ -1,5 +1,6 @@
 import { LogOut } from 'lucide-react';
 import { Button } from './ui/button';
+import { ThemeToggle } from './ThemeToggle';
 
 interface HeaderProps {
   onLogout: () => void;
@@ -15,14 +16,17 @@ export function Header({ onLogout }: HeaderProps) {
         <h1 className="text-xl font-semibold text-foreground">Alartd</h1>
       </div>
       
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onLogout}
-        className="text-muted-foreground hover:text-foreground"
-      >
-        <LogOut className="w-4 h-4" />
-      </Button>
+      <div className="flex items-center gap-2">
+        <ThemeToggle />
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onLogout}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <LogOut className="w-4 h-4" />
+        </Button>
+      </div>
     </header>
   );
 }

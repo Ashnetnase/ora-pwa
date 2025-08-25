@@ -7,11 +7,13 @@ interface SafetyItem {
   id: string;
   text: string;
   icon: React.ReactNode;
+  category?: string;
 }
 
 interface SafetyChecklist {
   id: string;
   title: string;
+  subtitle: string;
   icon: React.ReactNode;
   color: string;
   bgColor: string;
@@ -20,130 +22,291 @@ interface SafetyChecklist {
 
 const safetyChecklists: SafetyChecklist[] = [
   {
-    id: 'flood',
-    title: 'Flood Safety',
+    id: 'earthquake-prep',
+    title: 'Earthquake Preparedness',
+    subtitle: 'Complete preparation guide for earthquake events',
+    icon: <Ionicons name="flash" size={20} color="#ffffff" />,
+    color: '#EA580C',
+    bgColor: '#FFF7ED',
+    items: [
+      // Emergency Kit Items
+      {
+        id: 'eq1',
+        text: 'Water: 3 litres per person per day for 3 days minimum',
+        icon: <Ionicons name="water" size={16} color="#2563EB" />,
+        category: 'Emergency Kit'
+      },
+      {
+        id: 'eq2',
+        text: 'Non-perishable food for 3+ days (canned goods, energy bars)',
+        icon: <Ionicons name="bag" size={16} color="#059669" />,
+        category: 'Emergency Kit'
+      },
+      {
+        id: 'eq3',
+        text: 'Battery-powered or hand-crank radio and weather radio',
+        icon: <Ionicons name="radio" size={16} color="#7C3AED" />,
+        category: 'Emergency Kit'
+      },
+      {
+        id: 'eq4',
+        text: 'Flashlight and extra batteries for each family member',
+        icon: <Ionicons name="flashlight" size={16} color="#FBBF24" />,
+        category: 'Emergency Kit'
+      },
+      {
+        id: 'eq5',
+        text: 'First aid kit with medications and prescription drugs',
+        icon: <Ionicons name="medical" size={16} color="#DC2626" />,
+        category: 'Emergency Kit'
+      },
+      // Home Preparation
+      {
+        id: 'eq6',
+        text: 'Secure heavy furniture and appliances to walls',
+        icon: <Ionicons name="home" size={16} color="#92400E" />,
+        category: 'Home Safety'
+      },
+      {
+        id: 'eq7',
+        text: 'Install latches on cabinet doors to prevent contents from falling',
+        icon: <Ionicons name="warning" size={16} color="#EA580C" />,
+        category: 'Home Safety'
+      },
+      {
+        id: 'eq8',
+        text: 'Locate safe spots in each room (under sturdy tables, away from glass)',
+        icon: <Ionicons name="shield-checkmark" size={16} color="#2563EB" />,
+        category: 'Home Safety'
+      },
+      // Family Planning
+      {
+        id: 'eq9',
+        text: 'Create family emergency plan with meeting points and contacts',
+        icon: <Ionicons name="people" size={16} color="#059669" />,
+        category: 'Family Plan'
+      },
+      {
+        id: 'eq10',
+        text: 'Identify out-of-state contact person for family coordination',
+        icon: <Ionicons name="call" size={16} color="#2563EB" />,
+        category: 'Family Plan'
+      },
+      {
+        id: 'eq11',
+        text: 'Practice Drop, Cover, and Hold On drills regularly',
+        icon: <Ionicons name="checkmark-circle" size={16} color="#059669" />,
+        category: 'Family Plan'
+      },
+      // During Earthquake Actions
+      {
+        id: 'eq12',
+        text: 'DROP immediately onto hands and knees',
+        icon: <Ionicons name="alert" size={16} color="#DC2626" />,
+        category: 'During Event'
+      },
+      {
+        id: 'eq13',
+        text: 'COVER head and neck under sturdy table or against interior wall',
+        icon: <Ionicons name="shield" size={16} color="#2563EB" />,
+        category: 'During Event'
+      },
+      {
+        id: 'eq14',
+        text: 'HOLD ON to shelter and be prepared to move with it',
+        icon: <Ionicons name="hand-left" size={16} color="#EA580C" />,
+        category: 'During Event'
+      }
+    ],
+  },
+  {
+    id: 'flood-prep',
+    title: 'Flood Preparedness',
+    subtitle: 'Comprehensive flood safety and preparation guide',
     icon: <Ionicons name="water" size={20} color="#ffffff" />,
-    color: '#2563EB',
+    color: '#1D4ED8',
     bgColor: '#EFF6FF',
     items: [
+      // Pre-Flood Preparation
       {
-        id: 'f1',
-        text: 'Move to higher ground immediately',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'fl1',
+        text: 'Know your flood risk zone and evacuation routes',
+        icon: <Ionicons name="location" size={16} color="#2563EB" />,
+        category: 'Preparation'
       },
       {
-        id: 'f2',
-        text: 'Avoid walking or driving through flood water',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'fl2',
+        text: 'Keep sandbags, plastic sheeting, and lumber for emergency protection',
+        icon: <Ionicons name="bag" size={16} color="#92400E" />,
+        category: 'Preparation'
       },
       {
-        id: 'f3',
-        text: 'Turn off electricity at the main switch',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'fl3',
+        text: 'Install sump pump and backup power source',
+        icon: <Ionicons name="battery-charging" size={16} color="#059669" />,
+        category: 'Preparation'
       },
       {
-        id: 'f4',
-        text: 'Have emergency supplies ready (water, food, radio)',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'fl4',
+        text: 'Keep important documents in waterproof container',
+        icon: <Ionicons name="shield-checkmark" size={16} color="#2563EB" />,
+        category: 'Preparation'
+      },
+      // During Flood
+      {
+        id: 'fl5',
+        text: 'Move to higher ground immediately when warned',
+        icon: <Ionicons name="alert" size={16} color="#DC2626" />,
+        category: 'During Flood'
       },
       {
-        id: 'f5',
-        text: 'Stay informed via official emergency channels',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'fl6',
+        text: 'Never walk, swim, or drive through flood waters',
+        icon: <Ionicons name="car" size={16} color="#DC2626" />,
+        category: 'During Flood'
       },
       {
-        id: 'f6',
-        text: 'Do not return home until authorities say it\'s safe',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'fl7',
+        text: 'Turn off utilities at main switches if time permits',
+        icon: <Ionicons name="flash" size={16} color="#FBBF24" />,
+        category: 'During Flood'
       },
+      {
+        id: 'fl8',
+        text: 'Stay away from downed power lines and electrical wires',
+        icon: <Ionicons name="warning" size={16} color="#EA580C" />,
+        category: 'During Flood'
+      },
+      // Post-Flood Safety
+      {
+        id: 'fl9',
+        text: 'Wait for authorities to declare area safe before returning',
+        icon: <Ionicons name="shield" size={16} color="#059669" />,
+        category: 'After Flood'
+      },
+      {
+        id: 'fl10',
+        text: 'Avoid flood water - it may contain sewage, chemicals, or debris',
+        icon: <Ionicons name="water" size={16} color="#92400E" />,
+        category: 'After Flood'
+      },
+      {
+        id: 'fl11',
+        text: 'Photograph damage for insurance claims before cleaning',
+        icon: <Ionicons name="camera" size={16} color="#2563EB" />,
+        category: 'After Flood'
+      },
+      {
+        id: 'fl12',
+        text: 'Clean and disinfect everything that got wet',
+        icon: <Ionicons name="medical" size={16} color="#7C3AED" />,
+        category: 'After Flood'
+      }
     ],
   },
   {
-    id: 'earthquake',
-    title: 'Earthquake Safety',
-    icon: <Ionicons name="flash" size={20} color="#ffffff" />,
-    color: '#F59E0B',
-    bgColor: '#FFFBEB',
-    items: [
-      {
-        id: 'e1',
-        text: 'Drop, Cover, and Hold On during shaking',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
-      },
-      {
-        id: 'e2',
-        text: 'Stay away from windows and heavy objects',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
-      },
-      {
-        id: 'e3',
-        text: 'If outdoors, move away from buildings and power lines',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
-      },
-      {
-        id: 'e4',
-        text: 'Check for injuries and hazards after shaking stops',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
-      },
-      {
-        id: 'e5',
-        text: 'Be prepared for aftershocks',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
-      },
-      {
-        id: 'e6',
-        text: 'Have a family emergency plan and meeting place',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
-      },
-      {
-        id: 'e7',
-        text: 'Keep emergency kit stocked (3 days supplies)',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
-      },
-    ],
-  },
-  {
-    id: 'storm',
-    title: 'Storm Safety',
+    id: 'storm-kit',
+    title: 'Storm Emergency Kit',
+    subtitle: 'Essential supplies and preparation for severe weather',
     icon: <Ionicons name="cloudy" size={20} color="#ffffff" />,
-    color: '#6B7280',
+    color: '#374151',
     bgColor: '#F9FAFB',
     items: [
+      // Communication & Information
       {
-        id: 's1',
-        text: 'Stay indoors and away from windows',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'st1',
+        text: 'Battery-powered weather radio (NOAA Weather Radio)',
+        icon: <Ionicons name="radio" size={16} color="#2563EB" />,
+        category: 'Communication'
       },
       {
-        id: 's2',
-        text: 'Secure outdoor furniture and objects',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'st2',
+        text: 'Cell phone with chargers and backup battery/solar charger',
+        icon: <Ionicons name="battery-charging" size={16} color="#059669" />,
+        category: 'Communication'
       },
       {
-        id: 's3',
-        text: 'Avoid using electrical appliances',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'st3',
+        text: 'Two-way radios for family communication',
+        icon: <Ionicons name="radio" size={16} color="#7C3AED" />,
+        category: 'Communication'
+      },
+      // Lighting & Power
+      {
+        id: 'st4',
+        text: 'LED flashlights (one per person) with extra batteries',
+        icon: <Ionicons name="flashlight" size={16} color="#FBBF24" />,
+        category: 'Power & Light'
       },
       {
-        id: 's4',
-        text: 'Keep flashlights and battery radio ready',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'st5',
+        text: 'Battery-powered lanterns for area lighting',
+        icon: <Ionicons name="bulb" size={16} color="#EA580C" />,
+        category: 'Power & Light'
       },
       {
-        id: 's5',
-        text: 'Monitor weather warnings and updates',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'st6',
+        text: 'Generator with fuel (operated outdoors only)',
+        icon: <Ionicons name="flash" size={16} color="#DC2626" />,
+        category: 'Power & Light'
+      },
+      // Food & Water
+      {
+        id: 'st7',
+        text: 'One gallon of water per person per day (3-day minimum)',
+        icon: <Ionicons name="water" size={16} color="#2563EB" />,
+        category: 'Food & Water'
       },
       {
-        id: 's6',
-        text: 'Avoid driving unless absolutely necessary',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'st8',
+        text: 'Non-perishable food (canned goods, protein bars, dried fruits)',
+        icon: <Ionicons name="bag" size={16} color="#059669" />,
+        category: 'Food & Water'
       },
       {
-        id: 's7',
-        text: 'Stay away from damaged power lines',
-        icon: <Ionicons name="checkmark-circle" size={16} color="#10B981" />,
+        id: 'st9',
+        text: 'Manual can opener, disposable plates, cups, and utensils',
+        icon: <Ionicons name="restaurant" size={16} color="#92400E" />,
+        category: 'Food & Water'
       },
+      // Safety & Tools
+      {
+        id: 'st10',
+        text: 'First aid kit with bandages, antiseptic, and medications',
+        icon: <Ionicons name="medical" size={16} color="#DC2626" />,
+        category: 'Safety & Tools'
+      },
+      {
+        id: 'st11',
+        text: 'Multi-tool or Swiss Army knife with multiple functions',
+        icon: <Ionicons name="build" size={16} color="#374151" />,
+        category: 'Safety & Tools'
+      },
+      {
+        id: 'st12',
+        text: 'Duct tape and plastic sheeting for temporary repairs',
+        icon: <Ionicons name="home" size={16} color="#2563EB" />,
+        category: 'Safety & Tools'
+      },
+      // Comfort & Sanitation
+      {
+        id: 'st13',
+        text: 'Warm blankets, sleeping bags, and extra clothing',
+        icon: <Ionicons name="shirt" size={16} color="#7C3AED" />,
+        category: 'Comfort'
+      },
+      {
+        id: 'st14',
+        text: 'Personal hygiene items, toilet paper, and feminine supplies',
+        icon: <Ionicons name="heart" size={16} color="#EC4899" />,
+        category: 'Comfort'
+      },
+      {
+        id: 'st15',
+        text: 'Important documents in waterproof container',
+        icon: <Ionicons name="shield-checkmark" size={16} color="#2563EB" />,
+        category: 'Documents'
+      }
     ],
   },
 ];
@@ -259,7 +422,10 @@ export default function Info() {
                   <View style={[styles.checklistIconContainer, { backgroundColor: checklist.color }]}>
                     {checklist.icon}
                   </View>
-                  <Text style={styles.checklistTitle}>{checklist.title}</Text>
+                  <View style={styles.titleTextContainer}>
+                    <Text style={styles.checklistTitle}>{checklist.title}</Text>
+                    <Text style={styles.checklistSubtitle}>{checklist.subtitle}</Text>
+                  </View>
                 </View>
                 <View style={styles.chevronContainer}>
                   {isOpen ? (
@@ -272,18 +438,40 @@ export default function Info() {
               
               {isOpen && (
                 <CardContent style={styles.checklistContent}>
-                  <View style={styles.checklistItems}>
-                    {checklist.items.map(item => (
-                      <View key={item.id} style={styles.checklistItem}>
-                        <View style={styles.checklistItemIcon}>
-                          {item.icon}
+                  {(() => {
+                    // Group items by category
+                    const groupedItems = checklist.items.reduce((acc, item) => {
+                      const category = item.category || 'General';
+                      if (!acc[category]) acc[category] = [];
+                      acc[category].push(item);
+                      return acc;
+                    }, {} as Record<string, typeof checklist.items>);
+                    
+                    return Object.entries(groupedItems).map(([category, items]) => (
+                      <View key={category} style={styles.categorySection}>
+                        <View style={styles.categoryHeader}>
+                          <View style={styles.categoryBadge}>
+                            <Text style={styles.categoryBadgeText}>{category}</Text>
+                          </View>
+                          <Text style={styles.categoryItemCount}>
+                            {items.length} items
+                          </Text>
                         </View>
-                        <Text style={styles.checklistItemText}>
-                          {item.text}
-                        </Text>
+                        <View style={styles.checklistItems}>
+                          {items.map(item => (
+                            <View key={item.id} style={styles.checklistItem}>
+                              <View style={styles.checklistItemIcon}>
+                                {item.icon}
+                              </View>
+                              <Text style={styles.checklistItemText}>
+                                {item.text}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
                       </View>
-                    ))}
-                  </View>
+                    ));
+                  })()}
                 </CardContent>
               )}
             </Card>
@@ -465,10 +653,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  titleTextContainer: {
+    flex: 1,
+  },
   checklistTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: '#111827',
+  },
+  checklistSubtitle: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 2,
   },
   chevronContainer: {
     padding: 4,
@@ -477,6 +673,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 20,
     paddingTop: 0,
+  },
+  categorySection: {
+    marginBottom: 24,
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+  },
+  categoryBadge: {
+    backgroundColor: '#F3F4F6',
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  categoryBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#374151',
+  },
+  categoryItemCount: {
+    fontSize: 12,
+    color: '#6B7280',
   },
   checklistItems: {
     gap: 16,

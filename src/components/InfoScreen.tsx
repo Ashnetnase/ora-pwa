@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, Droplets, Zap, Wind, CheckCircle, Phone, ExternalLink, Shield, Globe, Cloud, Activity } from 'lucide-react';
+import { ChevronDown, ChevronRight, Droplets, Zap, Wind, CheckCircle, Phone, ExternalLink, Shield, Globe, Cloud, Activity, Home, Package, Battery, Radio, Flashlight, Heart, Users, MapPin, AlertTriangle, Thermometer } from 'lucide-react';
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
@@ -9,139 +9,306 @@ interface SafetyItem {
   id: string;
   text: string;
   icon: React.ReactNode;
+  category?: string;
 }
 
 interface SafetyChecklist {
   id: string;
   title: string;
+  subtitle: string;
   icon: React.ReactNode;
   color: string;
+  bgColor: string;
   items: SafetyItem[];
 }
 
 const safetyChecklists: SafetyChecklist[] = [
   {
-    id: 'flood',
-    title: 'Flood Safety',
-    icon: <Droplets className="w-5 h-5" />,
-    color: 'text-blue-600',
-    items: [
-      {
-        id: 'f1',
-        text: 'Move to higher ground immediately',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
-      },
-      {
-        id: 'f2',
-        text: 'Avoid walking or driving through flood water',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
-      },
-      {
-        id: 'f3',
-        text: 'Turn off electricity at the main switch',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
-      },
-      {
-        id: 'f4',
-        text: 'Have emergency supplies ready (water, food, radio)',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
-      },
-      {
-        id: 'f5',
-        text: 'Stay informed via official emergency channels',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
-      },
-      {
-        id: 'f6',
-        text: 'Do not return home until authorities say it\'s safe',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
-      },
-    ],
-  },
-  {
-    id: 'earthquake',
-    title: 'Earthquake Safety',
+    id: 'earthquake-prep',
+    title: 'Earthquake Preparedness',
+    subtitle: 'Complete preparation guide for earthquake events',
     icon: <Zap className="w-5 h-5" />,
-    color: 'text-yellow-600',
+    color: 'text-orange-700',
+    bgColor: 'bg-orange-50 border-orange-200',
     items: [
+      // Emergency Kit Items
       {
-        id: 'e1',
-        text: 'Drop, Cover, and Hold On during shaking',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'eq1',
+        text: 'Water: 3 litres per person per day for 3 days minimum',
+        icon: <Droplets className="w-4 h-4 text-blue-600" />,
+        category: 'Emergency Kit'
       },
       {
-        id: 'e2',
-        text: 'Stay away from windows and heavy objects',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'eq2',
+        text: 'Non-perishable food for 3+ days (canned goods, energy bars)',
+        icon: <Package className="w-4 h-4 text-green-600" />,
+        category: 'Emergency Kit'
       },
       {
-        id: 'e3',
-        text: 'If outdoors, move away from buildings and power lines',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'eq3',
+        text: 'Battery-powered or hand-crank radio and weather radio',
+        icon: <Radio className="w-4 h-4 text-purple-600" />,
+        category: 'Emergency Kit'
       },
       {
-        id: 'e4',
-        text: 'Check for injuries and hazards after shaking stops',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'eq4',
+        text: 'Flashlight and extra batteries for each family member',
+        icon: <Flashlight className="w-4 h-4 text-yellow-600" />,
+        category: 'Emergency Kit'
       },
       {
-        id: 'e5',
-        text: 'Be prepared for aftershocks',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'eq5',
+        text: 'First aid kit with medications and prescription drugs',
+        icon: <Heart className="w-4 h-4 text-red-600" />,
+        category: 'Emergency Kit'
+      },
+      // Home Preparation
+      {
+        id: 'eq6',
+        text: 'Secure heavy furniture and appliances to walls',
+        icon: <Home className="w-4 h-4 text-brown-600" />,
+        category: 'Home Safety'
       },
       {
-        id: 'e6',
-        text: 'Have a family emergency plan and meeting place',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'eq7',
+        text: 'Install latches on cabinet doors to prevent contents from falling',
+        icon: <AlertTriangle className="w-4 h-4 text-orange-600" />,
+        category: 'Home Safety'
       },
       {
-        id: 'e7',
-        text: 'Keep emergency kit stocked (3 days supplies)',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'eq8',
+        text: 'Locate safe spots in each room (under sturdy tables, away from glass)',
+        icon: <Shield className="w-4 h-4 text-blue-600" />,
+        category: 'Home Safety'
       },
+      // Family Planning
+      {
+        id: 'eq9',
+        text: 'Create family emergency plan with meeting points and contacts',
+        icon: <Users className="w-4 h-4 text-green-600" />,
+        category: 'Family Plan'
+      },
+      {
+        id: 'eq10',
+        text: 'Identify out-of-state contact person for family coordination',
+        icon: <Phone className="w-4 h-4 text-blue-600" />,
+        category: 'Family Plan'
+      },
+      {
+        id: 'eq11',
+        text: 'Practice Drop, Cover, and Hold On drills regularly',
+        icon: <CheckCircle className="w-4 h-4 text-green-600" />,
+        category: 'Family Plan'
+      },
+      // During Earthquake Actions
+      {
+        id: 'eq12',
+        text: 'DROP immediately onto hands and knees',
+        icon: <AlertTriangle className="w-4 h-4 text-red-600" />,
+        category: 'During Event'
+      },
+      {
+        id: 'eq13',
+        text: 'COVER head and neck under sturdy table or against interior wall',
+        icon: <Shield className="w-4 h-4 text-blue-600" />,
+        category: 'During Event'
+      },
+      {
+        id: 'eq14',
+        text: 'HOLD ON to shelter and be prepared to move with it',
+        icon: <Users className="w-4 h-4 text-orange-600" />,
+        category: 'During Event'
+      }
     ],
   },
   {
-    id: 'storm',
-    title: 'Storm Safety',
-    icon: <Wind className="w-5 h-5" />,
-    color: 'text-gray-600',
+    id: 'flood-prep',
+    title: 'Flood Preparedness',
+    subtitle: 'Comprehensive flood safety and preparation guide',
+    icon: <Droplets className="w-5 h-5" />,
+    color: 'text-blue-700',
+    bgColor: 'bg-blue-50 border-blue-200',
     items: [
+      // Pre-Flood Preparation
       {
-        id: 's1',
-        text: 'Stay indoors and away from windows',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'fl1',
+        text: 'Know your flood risk zone and evacuation routes',
+        icon: <MapPin className="w-4 h-4 text-blue-600" />,
+        category: 'Preparation'
       },
       {
-        id: 's2',
-        text: 'Secure outdoor furniture and objects',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'fl2',
+        text: 'Keep sandbags, plastic sheeting, and lumber for emergency protection',
+        icon: <Package className="w-4 h-4 text-brown-600" />,
+        category: 'Preparation'
       },
       {
-        id: 's3',
-        text: 'Avoid using electrical appliances',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'fl3',
+        text: 'Install sump pump and backup power source',
+        icon: <Battery className="w-4 h-4 text-green-600" />,
+        category: 'Preparation'
       },
       {
-        id: 's4',
-        text: 'Keep flashlights and battery radio ready',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'fl4',
+        text: 'Keep important documents in waterproof container',
+        icon: <Shield className="w-4 h-4 text-blue-600" />,
+        category: 'Preparation'
+      },
+      // During Flood
+      {
+        id: 'fl5',
+        text: 'Move to higher ground immediately when warned',
+        icon: <AlertTriangle className="w-4 h-4 text-red-600" />,
+        category: 'During Flood'
       },
       {
-        id: 's5',
-        text: 'Monitor weather warnings and updates',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'fl6',
+        text: 'Never walk, swim, or drive through flood waters',
+        icon: <Wind className="w-4 h-4 text-red-600" />,
+        category: 'During Flood'
       },
       {
-        id: 's6',
-        text: 'Avoid driving unless absolutely necessary',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'fl7',
+        text: 'Turn off utilities at main switches if time permits',
+        icon: <Zap className="w-4 h-4 text-yellow-600" />,
+        category: 'During Flood'
       },
       {
-        id: 's7',
-        text: 'Stay away from damaged power lines',
-        icon: <CheckCircle className="w-4 h-4 text-accent" />,
+        id: 'fl8',
+        text: 'Stay away from downed power lines and electrical wires',
+        icon: <AlertTriangle className="w-4 h-4 text-orange-600" />,
+        category: 'During Flood'
       },
+      // Post-Flood Safety
+      {
+        id: 'fl9',
+        text: 'Wait for authorities to declare area safe before returning',
+        icon: <Shield className="w-4 h-4 text-green-600" />,
+        category: 'After Flood'
+      },
+      {
+        id: 'fl10',
+        text: 'Avoid flood water - it may contain sewage, chemicals, or debris',
+        icon: <Droplets className="w-4 h-4 text-brown-600" />,
+        category: 'After Flood'
+      },
+      {
+        id: 'fl11',
+        text: 'Photograph damage for insurance claims before cleaning',
+        icon: <CheckCircle className="w-4 h-4 text-blue-600" />,
+        category: 'After Flood'
+      },
+      {
+        id: 'fl12',
+        text: 'Clean and disinfect everything that got wet',
+        icon: <Heart className="w-4 h-4 text-purple-600" />,
+        category: 'After Flood'
+      }
+    ],
+  },
+  {
+    id: 'storm-kit',
+    title: 'Storm Emergency Kit',
+    subtitle: 'Essential supplies and preparation for severe weather',
+    icon: <Wind className="w-5 h-5" />,
+    color: 'text-gray-700',
+    bgColor: 'bg-gray-50 border-gray-200',
+    items: [
+      // Communication & Information
+      {
+        id: 'st1',
+        text: 'Battery-powered weather radio (NOAA Weather Radio)',
+        icon: <Radio className="w-4 h-4 text-blue-600" />,
+        category: 'Communication'
+      },
+      {
+        id: 'st2',
+        text: 'Cell phone with chargers and backup battery/solar charger',
+        icon: <Battery className="w-4 h-4 text-green-600" />,
+        category: 'Communication'
+      },
+      {
+        id: 'st3',
+        text: 'Two-way radios for family communication',
+        icon: <Radio className="w-4 h-4 text-purple-600" />,
+        category: 'Communication'
+      },
+      // Lighting & Power
+      {
+        id: 'st4',
+        text: 'LED flashlights (one per person) with extra batteries',
+        icon: <Flashlight className="w-4 h-4 text-yellow-600" />,
+        category: 'Power & Light'
+      },
+      {
+        id: 'st5',
+        text: 'Battery-powered lanterns for area lighting',
+        icon: <Flashlight className="w-4 h-4 text-orange-600" />,
+        category: 'Power & Light'
+      },
+      {
+        id: 'st6',
+        text: 'Generator with fuel (operated outdoors only)',
+        icon: <Zap className="w-4 h-4 text-red-600" />,
+        category: 'Power & Light'
+      },
+      // Food & Water
+      {
+        id: 'st7',
+        text: 'One gallon of water per person per day (3-day minimum)',
+        icon: <Droplets className="w-4 h-4 text-blue-600" />,
+        category: 'Food & Water'
+      },
+      {
+        id: 'st8',
+        text: 'Non-perishable food (canned goods, protein bars, dried fruits)',
+        icon: <Package className="w-4 h-4 text-green-600" />,
+        category: 'Food & Water'
+      },
+      {
+        id: 'st9',
+        text: 'Manual can opener, disposable plates, cups, and utensils',
+        icon: <Package className="w-4 h-4 text-brown-600" />,
+        category: 'Food & Water'
+      },
+      // Safety & Tools
+      {
+        id: 'st10',
+        text: 'First aid kit with bandages, antiseptic, and medications',
+        icon: <Heart className="w-4 h-4 text-red-600" />,
+        category: 'Safety & Tools'
+      },
+      {
+        id: 'st11',
+        text: 'Multi-tool or Swiss Army knife with multiple functions',
+        icon: <AlertTriangle className="w-4 h-4 text-gray-600" />,
+        category: 'Safety & Tools'
+      },
+      {
+        id: 'st12',
+        text: 'Duct tape and plastic sheeting for temporary repairs',
+        icon: <Home className="w-4 h-4 text-blue-600" />,
+        category: 'Safety & Tools'
+      },
+      // Comfort & Sanitation
+      {
+        id: 'st13',
+        text: 'Warm blankets, sleeping bags, and extra clothing',
+        icon: <Thermometer className="w-4 h-4 text-purple-600" />,
+        category: 'Comfort'
+      },
+      {
+        id: 'st14',
+        text: 'Personal hygiene items, toilet paper, and feminine supplies',
+        icon: <Heart className="w-4 h-4 text-pink-600" />,
+        category: 'Comfort'
+      },
+      {
+        id: 'st15',
+        text: 'Important documents in waterproof container',
+        icon: <Shield className="w-4 h-4 text-blue-600" />,
+        category: 'Documents'
+      }
     ],
   },
 ];
@@ -251,8 +418,16 @@ export function InfoScreen() {
         {safetyChecklists.map(checklist => {
           const isOpen = openChecklists.has(checklist.id);
           
+          // Group items by category
+          const groupedItems = checklist.items.reduce((acc, item) => {
+            const category = item.category || 'General';
+            if (!acc[category]) acc[category] = [];
+            acc[category].push(item);
+            return acc;
+          }, {} as Record<string, typeof checklist.items>);
+          
           return (
-            <Card key={checklist.id} className="shadow-sm">
+            <Card key={checklist.id} className={`shadow-sm ${checklist.bgColor}`}>
               <Collapsible
                 open={isOpen}
                 onOpenChange={() => toggleChecklist(checklist.id)}
@@ -262,7 +437,10 @@ export function InfoScreen() {
                     <CardTitle className="flex items-center justify-between">
                       <div className={`flex items-center gap-3 ${checklist.color}`}>
                         {checklist.icon}
-                        <span className="text-foreground">{checklist.title}</span>
+                        <div>
+                          <div className="text-foreground text-lg font-semibold">{checklist.title}</div>
+                          <div className="text-sm text-muted-foreground font-normal">{checklist.subtitle}</div>
+                        </div>
                       </div>
                       {isOpen ? (
                         <ChevronDown className="w-5 h-5 text-muted-foreground" />
@@ -275,13 +453,27 @@ export function InfoScreen() {
                 
                 <CollapsibleContent>
                   <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      {checklist.items.map(item => (
-                        <div key={item.id} className="flex items-start gap-3">
-                          {item.icon}
-                          <span className="text-sm text-foreground leading-relaxed">
-                            {item.text}
-                          </span>
+                    <div className="space-y-6">
+                      {Object.entries(groupedItems).map(([category, items]) => (
+                        <div key={category}>
+                          <h4 className="font-medium text-foreground mb-3 pb-1 border-b border-border/30 flex items-center gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {category}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground">
+                              {items.length} items
+                            </span>
+                          </h4>
+                          <div className="space-y-3">
+                            {items.map(item => (
+                              <div key={item.id} className="flex items-start gap-3 p-2 rounded-md hover:bg-muted/30 transition-colors">
+                                {item.icon}
+                                <span className="text-sm text-foreground leading-relaxed">
+                                  {item.text}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       ))}
                     </div>
