@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Cloud, AlertTriangle, Thermometer, Wind, Droplets, Eye, Calendar, MapPin, Clock, RefreshCw } from 'lucide-react';
+import { Cloud, AlertTriangle, Thermometer, Wind, Droplets, Eye, Calendar, MapPin, Clock, RefreshCw, Sun, CloudRain, Settings } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
@@ -24,10 +24,21 @@ interface WeatherData {
   forecasts: WeatherForecast[];
 }
 
+interface CurrentWeather {
+  temperature: number;
+  condition: string;
+  high: number;
+  low: number;
+  location: string;
+}
+
 export function WeatherScreen({ subscriptions }: WeatherScreenProps) {
   const [weatherData, setWeatherData] = useState<WeatherData>({ warnings: [], forecasts: [] });
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [currentWeather, setCurrentWeather] = useState<CurrentWeather | null>(null);
+  const [locationEnabled, setLocationEnabled] = useState<boolean | null>(null);
+  const [currentLocationLoading, setCurrentLocationLoading] = useState(false);
 
   const loadWeatherData = async () => {
     setIsLoading(true);
@@ -48,6 +59,74 @@ export function WeatherScreen({ subscriptions }: WeatherScreenProps) {
     }
   };
 
+  const checkLocationPermission = async () => {
+    if ('geolocation' in navigator) {
+      try {
+        const permission = await navigator.permissions.query({ name: 'geolocation' });
+        setLocationEnabled(permission.state === 'granted');
+        
+        permission.onchange = () => {
+          setLocationEnabled(permission.state === 'granted');
+          if (permission.state === 'granted') {
+            loadCurrentWeather();
+          }
+        };
+      } catch (error) {
+        console.error('Error checking location permission:', error);
+        setLocationEnabled(false);
+      }
+    } else {
+      setLocationEnabled(false);
+    }
+  };
+
+  const requestLocationPermission = () => {
+    if ('geolocation' in navigator) {
+      setCurrentLocationLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          setLocationEnabled(true);
+          await loadCurrentWeatherFromCoords(position.coords.latitude, position.coords.longitude);
+          setCurrentLocationLoading(false);
+        },
+        (error) => {
+          console.error('Location permission denied:', error);
+          setLocationEnabled(false);
+          setCurrentLocationLoading(false);
+        }
+      );
+    }
+  };
+
+  const loadCurrentWeatherFromCoords = async (lat: number, lng: number) => {
+    try {
+      // Mock current weather data - in real app, use weather API with coordinates
+      const mockCurrentWeather: CurrentWeather = {
+        temperature: Math.round(Math.random() * 15) + 15, // 15-30°C
+        condition: ['sunny', 'cloudy', 'rainy'][Math.floor(Math.random() * 3)],
+        high: Math.round(Math.random() * 10) + 25, // 25-35°C
+        low: Math.round(Math.random() * 10) + 10, // 10-20°C
+        location: 'Current Location'
+      };
+      setCurrentWeather(mockCurrentWeather);
+    } catch (error) {
+      console.error('Failed to load current weather:', error);
+    }
+  };
+
+  const loadCurrentWeather = async () => {
+    if ('geolocation' in navigator && locationEnabled) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          await loadCurrentWeatherFromCoords(position.coords.latitude, position.coords.longitude);
+        },
+        (error) => {
+          console.error('Failed to get current location:', error);
+        }
+      );
+    }
+  };
+
   useEffect(() => {
     if (subscriptions.length > 0) {
       loadWeatherData();
@@ -56,6 +135,16 @@ export function WeatherScreen({ subscriptions }: WeatherScreenProps) {
       setIsLoading(false);
     }
   }, [subscriptions]);
+
+  useEffect(() => {
+    checkLocationPermission();
+  }, []);
+
+  useEffect(() => {
+    if (locationEnabled) {
+      loadCurrentWeather();
+    }
+  }, [locationEnabled]);
 
   const getSeverityBadgeVariant = (severity: WeatherWarning['severity']) => {
     switch (severity) {
@@ -93,6 +182,20 @@ export function WeatherScreen({ subscriptions }: WeatherScreenProps) {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getCurrentWeatherIcon = (condition: string, temp: number) => {
+    if (condition.includes('rain') || condition === 'rainy') {
+      return <CloudRain className="w-6 h-6 text-blue-500" />;
+    } else if (condition.includes('cloud') || condition === 'cloudy') {
+      return <Cloud className="w-6 h-6 text-gray-500" />;
+    } else if (temp > 25) {
+      return <Sun className="w-6 h-6 text-yellow-500" />;
+    } else if (condition.includes('wind')) {
+      return <Wind className="w-6 h-6 text-gray-600" />;
+    } else {
+      return <Sun className="w-6 h-6 text-orange-500" />;
+    }
   };
 
   const subscribedCities = subscriptions.map(sub => sub.name);
@@ -271,6 +374,87 @@ export function WeatherScreen({ subscriptions }: WeatherScreenProps) {
           </CardContent>
         </Card>
       )}
+
+      {/* Current Weather Section */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
+          <Thermometer className="w-5 h-5 text-blue-500" />
+          Current Weather
+        </h3>
+        
+        {locationEnabled === false ? (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="flex items-center gap-2 text-blue-700 mb-1">
+                    <MapPin className="w-4 h-4" />
+                    <span className="font-medium">Enable Location</span>
+                  </div>
+                  <p className="text-sm text-blue-600">
+                    Allow location access to see current weather conditions
+                  </p>
+                </div>
+                <Button
+                  onClick={requestLocationPermission}
+                  disabled={currentLocationLoading}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {currentLocationLoading ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Settings className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : currentWeather ? (
+          <Card className="overflow-hidden">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                {/* Temperature Display */}
+                <div className="flex items-center gap-4">
+                  <div className="text-3xl font-bold text-foreground">
+                    {currentWeather.temperature}°C
+                  </div>
+                  {getCurrentWeatherIcon(currentWeather.condition, currentWeather.temperature)}
+                </div>
+                
+                {/* High/Low Temps */}
+                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs">H:</span>
+                    <span className="font-medium">{currentWeather.high}°</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs">L:</span>
+                    <span className="font-medium">{currentWeather.low}°</span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Location */}
+              <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="w-3 h-3" />
+                <span>{currentWeather.location}</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : locationEnabled && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-center py-4">
+                <div className="text-center">
+                  <RefreshCw className="w-6 h-6 text-primary animate-spin mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Getting current weather...</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Loading State */}
       {isLoading && (
