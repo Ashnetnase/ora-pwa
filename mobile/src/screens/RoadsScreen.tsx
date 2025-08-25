@@ -1,10 +1,243 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { View, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { MapPin, Clock, Triangle } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { DataService, RoadData } from '../services/mockData';
+
+// Design System Colors (matching MapScreen)
+const COLORS = {
+  primary: '#2563EB',
+  accent: '#10B981',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  background: '#F9FAFB',
+  white: '#FFFFFF',
+  gray: {
+    50: '#F9FAFB',
+    100: '#F3F4F6',
+    200: '#E5E7EB',
+    300: '#D1D5DB',
+    400: '#9CA3AF',
+    500: '#6B7280',
+    600: '#4B5563',
+    700: '#374151',
+    800: '#1F2937',
+    900: '#111827',
+  }
+};
+
+// Road Details Modal Component using Portal
+const RoadDetailsModal = ({ road, onClose, getRoadStatusDetails, COLORS }: {
+  road: RoadData;
+  onClose: () => void;
+  getRoadStatusDetails: (severity: string) => any;
+  COLORS: any;
+}) => {
+  const modalContent = (
+    <div 
+      className="fixed inset-0 flex items-center justify-center"
+      style={{ 
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 999999
+      }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div 
+        className="relative w-full max-w-md mx-4 rounded-lg shadow-xl border"
+        style={{ 
+          backgroundColor: COLORS.white,
+          borderColor: COLORS.gray[200],
+          maxHeight: 'calc(100vh - 100px)',
+          zIndex: 999999
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div 
+          className="flex items-center justify-between p-4 border-b"
+          style={{ borderColor: COLORS.gray[200] }}
+        >
+          <div className="flex items-center gap-2">
+            <Triangle className="w-5 h-5 fill-current" style={{ color: COLORS.warning }} />
+            <h2 className="text-lg font-semibold" style={{ color: COLORS.gray[900] }}>
+              Road Condition Details
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-md hover:bg-gray-100 transition-colors"
+            style={{ color: COLORS.gray[500] }}
+          >
+            <span className="text-xl font-bold">×</span>
+          </button>
+        </div>
+
+        {/* Modal Content */}
+        <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+          {(() => {
+            const statusDetails = getRoadStatusDetails(road.status || '');
+            return (
+              <div className="space-y-4">
+                {/* Road Name */}
+                <div>
+                  <h3 className="text-lg font-semibold mb-1" style={{ color: COLORS.gray[900] }}>
+                    {road.name}
+                  </h3>
+                  <p className="text-sm" style={{ color: COLORS.gray[600] }}>
+                    📍 {road.city}
+                  </p>
+                </div>
+
+                {/* Status Badge */}
+                <div 
+                  className="p-3 rounded-lg border-l-4"
+                  style={{ 
+                    backgroundColor: statusDetails.bgColor,
+                    borderColor: statusDetails.color
+                  }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span 
+                      className="font-semibold text-sm"
+                      style={{ color: statusDetails.color }}
+                    >
+                      {statusDetails.status}
+                    </span>
+                    <span 
+                      className="text-xs px-2 py-1 rounded-full"
+                      style={{ 
+                        backgroundColor: statusDetails.color,
+                        color: COLORS.white
+                      }}
+                    >
+                      {statusDetails.impact} Impact
+                    </span>
+                  </div>
+                  <p className="text-sm" style={{ color: COLORS.gray[700] }}>
+                    {statusDetails.description}
+                  </p>
+                </div>
+
+                {/* Current Description */}
+                <div>
+                  <h4 className="font-medium mb-2" style={{ color: COLORS.gray[900] }}>
+                    Current Situation
+                  </h4>
+                  <p className="text-sm leading-relaxed" style={{ color: COLORS.gray[600] }}>
+                    {road.description}
+                  </p>
+                </div>
+
+                {/* Additional Details */}
+                <div className="grid grid-cols-1 gap-3">
+                  <div 
+                    className="p-3 rounded-lg"
+                    style={{ backgroundColor: COLORS.gray[50] }}
+                  >
+                    <h5 className="font-medium text-sm mb-1" style={{ color: COLORS.gray[900] }}>
+                      Expected Duration
+                    </h5>
+                    <p className="text-sm" style={{ color: COLORS.gray[600] }}>
+                      {road.estimatedDuration || statusDetails.expectedDuration}
+                    </p>
+                  </div>
+
+                  <div 
+                    className="p-3 rounded-lg"
+                    style={{ backgroundColor: COLORS.gray[50] }}
+                  >
+                    <h5 className="font-medium text-sm mb-1" style={{ color: COLORS.gray[900] }}>
+                      Travel Advice
+                    </h5>
+                    <p className="text-sm" style={{ color: COLORS.gray[600] }}>
+                      {statusDetails.advice}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Location Information */}
+                <div 
+                  className="p-3 rounded-lg border"
+                  style={{ 
+                    backgroundColor: '#f0f9ff',
+                    borderColor: COLORS.primary
+                  }}
+                >
+                  <h5 className="font-medium text-sm mb-2" style={{ color: COLORS.primary }}>
+                    Location Details
+                  </h5>
+                  <div className="space-y-1 text-sm" style={{ color: COLORS.gray[600] }}>
+                    <p>📍 City: {road.city}</p>
+                    <p>🗺️ Location: {road.location}</p>
+                    <p>🌍 Coordinates: {road.latitude.toFixed(4)}, {road.longitude.toFixed(4)}</p>
+                    <p>⏰ Last Updated: {road.lastUpdated}</p>
+                  </div>
+                </div>
+
+                {/* Emergency Contacts */}
+                <div 
+                  className="p-3 rounded-lg border"
+                  style={{ 
+                    backgroundColor: '#fef2f2',
+                    borderColor: COLORS.error
+                  }}
+                >
+                  <h5 className="font-medium text-sm mb-2" style={{ color: COLORS.error }}>
+                    Emergency Information
+                  </h5>
+                  <div className="space-y-1 text-sm" style={{ color: COLORS.gray[600] }}>
+                    <p>🚨 Emergency: 111</p>
+                    <p>🛣️ Road Info: *555 (*ROA)</p>
+                    <p>ℹ️ NZTA: 0800 4 HIGHWAYS</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+
+        {/* Modal Footer */}
+        <div 
+          className="flex justify-end gap-2 p-4 border-t"
+          style={{ borderColor: COLORS.gray[200] }}
+        >
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onClose}
+            className="px-4 py-2 text-sm"
+          >
+            Close
+          </Button>
+          <Button
+            size="sm"
+            className="px-4 py-2 text-sm text-white"
+            style={{ backgroundColor: COLORS.primary }}
+            onClick={onClose}
+          >
+            Get Directions
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(modalContent, document.body);
+};
 
 interface RoadsScreenProps {
   subscriptions: Array<{
@@ -20,6 +253,7 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
   const [selectedTab, setSelectedTab] = useState('all');
   const [roads, setRoads] = useState<RoadData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [detailedRoadView, setDetailedRoadView] = useState<RoadData | null>(null);
 
   // Load road data for subscribed cities
   useEffect(() => {
@@ -82,6 +316,52 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
       planned: roads.filter(r => r.status === 'planned').length,
       clear: roads.filter(r => r.status === 'clear').length,
     };
+  };
+
+  // Function to get detailed road status information (matching MapScreen)
+  const getRoadStatusDetails = (severity: string) => {
+    switch (severity?.toLowerCase()) {
+      case 'closed':
+        return {
+          status: 'Road Closed',
+          color: COLORS.error,
+          bgColor: '#fee2e2',
+          description: 'This road is currently closed to all traffic. Alternative routes should be used.',
+          impact: 'High',
+          expectedDuration: 'Unknown',
+          advice: 'Use alternative routes. Check for updates regularly.'
+        };
+      case 'planned':
+        return {
+          status: 'Planned Work',
+          color: COLORS.warning,
+          bgColor: '#fef3c7',
+          description: 'Scheduled maintenance or construction work is planned for this road.',
+          impact: 'Medium',
+          expectedDuration: 'Varies',
+          advice: 'Plan for delays. Consider alternative routes during work hours.'
+        };
+      case 'clear':
+        return {
+          status: 'Road Clear',
+          color: COLORS.accent,
+          bgColor: '#d1fae5',
+          description: 'This road is currently clear with normal traffic conditions.',
+          impact: 'Low',
+          expectedDuration: 'N/A',
+          advice: 'Normal driving conditions. Stay alert for changing conditions.'
+        };
+      default:
+        return {
+          status: 'Unknown Status',
+          color: COLORS.gray[500],
+          bgColor: COLORS.gray[100],
+          description: 'Road condition information is not available at this time.',
+          impact: 'Unknown',
+          expectedDuration: 'Unknown',
+          advice: 'Exercise caution and check for updates.'
+        };
+    }
   };
 
   const counts = getStatusCounts();
@@ -155,7 +435,7 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
               <div className="text-center py-8 text-muted-foreground">No roads in this category</div>
             ) : (
               filterRoads('all').map(road => (
-                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} />
+                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} onClick={() => setDetailedRoadView(road)} />
               ))
             )}
           </TabsContent>
@@ -165,7 +445,7 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
               <div className="text-center py-8 text-muted-foreground">No closed roads</div>
             ) : (
               filterRoads('closed').map(road => (
-                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} />
+                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} onClick={() => setDetailedRoadView(road)} />
               ))
             )}
           </TabsContent>
@@ -175,7 +455,7 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
               <div className="text-center py-8 text-muted-foreground">No planned closures</div>
             ) : (
               filterRoads('planned').map(road => (
-                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} />
+                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} onClick={() => setDetailedRoadView(road)} />
               ))
             )}
           </TabsContent>
@@ -185,11 +465,21 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
               <div className="text-center py-8 text-muted-foreground">No clear roads</div>
             ) : (
               filterRoads('clear').map(road => (
-                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} />
+                <RoadCard key={road.id} road={road} getStatusBadge={getStatusBadge} onClick={() => setDetailedRoadView(road)} />
               ))
             )}
           </TabsContent>
         </Tabs>
+      )}
+
+      {/* Detailed Road Condition Modal using Portal */}
+      {detailedRoadView && (
+        <RoadDetailsModal
+          road={detailedRoadView}
+          onClose={() => setDetailedRoadView(null)}
+          getRoadStatusDetails={getRoadStatusDetails}
+          COLORS={COLORS}
+        />
       )}
     </div>
   );
@@ -198,11 +488,12 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
 interface RoadCardProps {
   road: RoadData;
   getStatusBadge: (status: RoadData['status']) => React.ReactNode;
+  onClick: () => void;
 }
 
-function RoadCard({ road, getStatusBadge }: RoadCardProps) {
+function RoadCard({ road, getStatusBadge, onClick }: RoadCardProps) {
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-sm cursor-pointer hover:shadow-md transition-shadow" onClick={onClick}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between mb-2">
           <h3 className="font-medium text-foreground">{road.name}</h3>

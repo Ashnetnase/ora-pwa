@@ -1,6 +1,10 @@
 // Mock data service - structured for easy API integration later
 // Replace these with real API calls to GeoNet, NZTA, etc.
 
+import { NZTAService } from './nztaApi';
+import { GeoNetService, GeoNetQuake } from './geonetApi';
+import { NZRegionService } from './nzRegions';
+
 export interface QuakeData {
   id: string;
   city: string;
@@ -10,6 +14,8 @@ export interface QuakeData {
   depth: number;
   time: string;
   intensity: string;
+  location?: string;
+  isReal?: boolean;
   // Future: Can map to GeoNet API response
 }
 
@@ -40,19 +46,13 @@ export interface CommunityReport {
   // Future: Can map to local emergency services API
 }
 
-// NZ City coordinates for mapping
-export const NZ_CITY_COORDS: Record<string, { lat: number; lng: number }> = {
-  'Auckland': { lat: -36.8485, lng: 174.7633 },
-  'Wellington': { lat: -41.2865, lng: 174.7762 },
-  'Christchurch': { lat: -43.5321, lng: 172.6362 },
-  'Hamilton': { lat: -37.7870, lng: 175.2793 },
-  'Tauranga': { lat: -37.6878, lng: 176.1651 },
-  'Dunedin': { lat: -45.8788, lng: 170.5028 },
-  'Palmerston North': { lat: -40.3523, lng: 175.6082 },
-  'Napier': { lat: -39.4928, lng: 176.9120 },
-  'Nelson': { lat: -41.2706, lng: 173.2840 },
-  'Rotorua': { lat: -38.1368, lng: 176.2497 },
-};
+// NZ City coordinates for mapping - now using comprehensive regional data
+export const NZ_CITY_COORDS: Record<string, { lat: number; lng: number }> = {};
+
+// Initialize coordinates from regional data
+NZRegionService.getAllCities().forEach(city => {
+  NZ_CITY_COORDS[city.name] = { lat: city.lat, lng: city.lng };
+});
 
 // Mock earthquake data - replace with GeoNet API
 export const MOCK_QUAKES: QuakeData[] = [
@@ -209,27 +209,176 @@ export const MOCK_COMMUNITY: CommunityReport[] = [
   },
 ];
 
-// API service functions (currently returning mock data)
+// API service functions (now integrated with real NZTA API)
 export class DataService {
-  // Future: Replace with actual GeoNet API call
-  static async getEarthquakeData(cities?: string[]): Promise<QuakeData[]> {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (cities && cities.length > 0) {
-      return MOCK_QUAKES.filter(quake => cities.includes(quake.city));
-    }
-    return MOCK_QUAKES;
+  /**
+   * Clear all cached data and force refresh from APIs
+   */
+  static clearCache(): void {
+    console.log('Clearing API cache...');
+    NZTAService.clearCache();
+    GeoNetService.clearCache();
   }
 
-  // Future: Replace with actual NZTA API call
-  static async getRoadData(cities?: string[]): Promise<RoadData[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    if (cities && cities.length > 0) {
-      return MOCK_ROADS.filter(road => cities.includes(road.city));
+  /**
+   * Find the nearest city to given coordinates from the list of subscribed cities
+   */
+  private static getNearestCity(lat: number, lng: number, cities: string[]): string {
+    if (cities.length === 0) {
+      // If no specific cities, try to match with all known cities
+      const allCities = Object.keys(NZ_CITY_COORDS);
+      return this.findClosestCity(lat, lng, allCities);
     }
-    return MOCK_ROADS;
+    
+    return this.findClosestCity(lat, lng, cities);
+  }
+
+  /**
+   * Calculate distance and find closest city
+   */
+  private static findClosestCity(lat: number, lng: number, cities: string[]): string {
+    let closestCity = cities[0] || 'Unknown';
+    let minDistance = Infinity;
+    
+    cities.forEach(city => {
+      const cityCoords = NZ_CITY_COORDS[city];
+      if (cityCoords) {
+        const distance = this.calculateDistance(lat, lng, cityCoords.lat, cityCoords.lng);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestCity = city;
+        }
+      }
+    });
+    
+    return closestCity;
+  }
+
+  /**
+   * Calculate distance between two points using Haversine formula
+   */
+  private static calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLng = this.toRadians(lng2 - lng1);
+    const a = 
+      Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) * 
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c;
+  }
+
+  /**
+   * Convert degrees to radians
+   */
+  private static toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
+  /**
+   * Get real-time incidents from NZTA for debugging
+   */
+  static async getNZTAIncidents() {
+    return NZTAService.getIncidents();
+  }
+  /**
+   * Expand subscriptions to include all cities in subscribed regions
+   */
+  static expandSubscriptions(subscriptions: Array<{name: string; type: 'city' | 'region'}>): string[] {
+    const allCities: string[] = [];
+    
+    subscriptions.forEach(subscription => {
+      if (subscription.type === 'region') {
+        // Add all cities in the region
+        const citiesInRegion = NZRegionService.getCitiesInRegion(subscription.name);
+        citiesInRegion.forEach(city => {
+          if (!allCities.includes(city.name)) {
+            allCities.push(city.name);
+          }
+        });
+      } else {
+        // Add individual city
+        if (!allCities.includes(subscription.name)) {
+          allCities.push(subscription.name);
+        }
+      }
+    });
+    
+    return allCities;
+  }
+
+  // Real GeoNet API integration with fallback to mock data
+  static async getEarthquakeData(cities?: string[]): Promise<QuakeData[]> {
+    try {
+      console.log('Fetching earthquake data from GeoNet API...');
+      
+      // Use real GeoNet API
+      const geonetQuakes = await GeoNetService.getEarthquakesByRegion(cities || []);
+      
+      if (geonetQuakes.length > 0) {
+        console.log(`Retrieved ${geonetQuakes.length} earthquakes from GeoNet`);
+        
+        // Transform GeoNet data to our QuakeData format
+        return geonetQuakes.map((quake: GeoNetQuake) => ({
+          id: quake.publicID,
+          city: this.getNearestCity(quake.latitude, quake.longitude, cities || []),
+          latitude: quake.latitude,
+          longitude: quake.longitude,
+          magnitude: quake.magnitude,
+          depth: quake.depth,
+          time: quake.time,
+          intensity: GeoNetService.getIntensityDescription(quake.magnitude),
+          location: quake.locality,
+          isReal: true // Flag to indicate real data
+        }));
+      }
+      
+      console.log('No GeoNet earthquakes found, using mock data');
+      throw new Error('No GeoNet data');
+      
+    } catch (error) {
+      console.warn('GeoNet API failed, using mock data:', error);
+      
+      // Fallback to mock data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      if (cities && cities.length > 0) {
+        return MOCK_QUAKES.filter(quake => cities.includes(quake.city))
+          .map(quake => ({ ...quake, isReal: false }));
+      }
+      return MOCK_QUAKES.map(quake => ({ ...quake, isReal: false }));
+    }
+  }
+
+  // Real NZTA API integration with fallback to mock data
+  static async getRoadData(cities?: string[]): Promise<RoadData[]> {
+    try {
+      console.log('Fetching road data from NZTA API...');
+      
+      // Use real NZTA API
+      const nztaRoadData = await NZTAService.getRoadDataFromNZTA(cities);
+      
+      if (nztaRoadData.length > 0) {
+        console.log(`Retrieved ${nztaRoadData.length} road incidents from NZTA`);
+        return nztaRoadData;
+      }
+      
+      // If no NZTA data, fall back to mock data
+      console.log('No NZTA data available, using mock data');
+      throw new Error('No NZTA data');
+      
+    } catch (error) {
+      console.warn('NZTA API failed, using mock data:', error);
+      
+      // Fallback to mock data
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      if (cities && cities.length > 0) {
+        return MOCK_ROADS.filter(road => cities.includes(road.city));
+      }
+      return MOCK_ROADS;
+    }
   }
 
   // Future: Replace with local emergency services API call

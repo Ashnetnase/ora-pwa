@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Clock, MapPin } from 'lucide-react';
+import { Clock, MapPin, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Button } from './ui/button';
 import { DataService, RoadData } from '../services/mockData';
 
 interface RoadsScreenProps {
@@ -19,28 +20,51 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
   const [selectedTab, setSelectedTab] = useState('all');
   const [roads, setRoads] = useState<RoadData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dataSource, setDataSource] = useState<'nzta' | 'mock' | 'unknown'>('unknown');
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Load road data for subscribed cities
-  useEffect(() => {
-    const loadRoadData = async () => {
-      setIsLoading(true);
-      try {
-        // Get cities with roading alerts enabled
-        const subscribedCities = subscriptions
-          .filter(sub => sub.roading)
-          .map(sub => sub.name);
+  const loadRoadData = async () => {
+    setIsLoading(true);
+    try {
+      // Get cities with roading alerts enabled
+      const subscribedCities = subscriptions
+        .filter(sub => sub.roading)
+        .map(sub => sub.name);
 
-        const roadData = subscribedCities.length > 0 
-          ? await DataService.getRoadData(subscribedCities)
-          : [];
-        setRoads(roadData);
-      } catch (error) {
-        console.error('Failed to load road data:', error);
-      } finally {
-        setIsLoading(false);
+      console.log('Loading road data for cities:', subscribedCities);
+      
+      const roadData = subscribedCities.length > 0 
+        ? await DataService.getRoadData(subscribedCities)
+        : [];
+      
+      setRoads(roadData);
+      setLastUpdated(new Date());
+      
+      // Detect data source based on road IDs
+      if (roadData.length > 0) {
+        const hasNZTAIds = roadData.some(road => road.id.startsWith('nzta_'));
+        setDataSource(hasNZTAIds ? 'nzta' : 'mock');
+        console.log(`Loaded ${roadData.length} roads from ${hasNZTAIds ? 'NZTA' : 'mock data'}`);
+      } else {
+        setDataSource('unknown');
+        console.log('No road data loaded');
       }
-    };
+    } catch (error) {
+      console.error('Failed to load road data:', error);
+      setDataSource('mock');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  const handleRefresh = async () => {
+    console.log('Manual refresh triggered');
+    DataService.clearCache();
+    await loadRoadData();
+  };
+
+  useEffect(() => {
     loadRoadData();
   }, [subscriptions]); // Changed dependency to subscriptions instead of subscribedCities
 
@@ -107,12 +131,37 @@ export function RoadsScreen({ subscriptions }: RoadsScreenProps) {
   return (
     <div className="p-4">
       <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-foreground mb-2">
-          Road Conditions
-        </h2>
+        <div className="flex items-start justify-between mb-2">
+          <h2 className="text-2xl font-semibold text-foreground">
+            Road Conditions
+          </h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
         <p className="text-muted-foreground">
           Roads for {subscribedCities.join(', ')} • {roads.length} roads found
         </p>
+        {lastUpdated && (
+          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+            <div className={`w-2 h-2 rounded-full ${
+              dataSource === 'nzta' ? 'bg-green-500' : 
+              dataSource === 'mock' ? 'bg-orange-500' : 'bg-gray-500'
+            }`} />
+            <span>
+              {dataSource === 'nzta' ? '🟢 Live NZTA Data' : 
+               dataSource === 'mock' ? '🟠 Mock Data (NZTA offline)' : '⚪ Unknown Source'}
+            </span>
+            <span>• Last updated: {lastUpdated.toLocaleTimeString()}</span>
+          </div>
+        )}
       </div>
 
       {isLoading ? (

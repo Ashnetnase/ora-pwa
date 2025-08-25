@@ -14,6 +14,8 @@ type Screen = 'login' | 'home' | 'map' | 'roads' | 'report' | 'info';
 interface CitySubscription {
   id: string;
   name: string;
+  type: 'city' | 'region';
+  region?: string;
   quakes: boolean;
   roading: boolean;
   community: boolean;
